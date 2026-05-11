@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simulador 3D - Caja Personalizada</title>
+
+    <meta name="description"
+        content="Simulador 3D interactivo de una caja decorativa personalizada para presentes académicos." />
+
+    <link rel="stylesheet" href="/src/styles.css" />
+</head>
+
+<body>
+    <main class="app">
+        <aside class="sidebar">
+            <section class="brand">
+                <span class="brand__tag">Simulador 3D</span>
+                <h1>Caja Personalizada</h1>
+                <p>
+                    Visualización interactiva de una caja decorativa organizada como
+                    presente académico para presentaciones finales, defensas y
+                    proyectos.
+                </p>
+            </section>
+
+            <section class="panel">
+                <h2>Configuración inicial</h2>
+
+                <div class="control-group">
+                    <label for="preset">Versión de caja</label>
+                    <select id="preset">
+                        <option value="basica">Básica</option>
+                        <option value="estandar" selected>Estándar</option>
+                        <option value="completa">Completa</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="boxColor">Color exterior</label>
+                    <input id="boxColor" type="color" value="#c89f72" />
+                </div>
+
+                <div class="control-group">
+                    <label for="interiorColor">Color interior</label>
+                    <input id="interiorColor" type="color" value="#f3e0c5" />
+                </div>
+
+                <button id="toggleLid" type="button">Abrir / cerrar caja</button>
+            </section>
+
+            <section class="legend">
+                <h2>Contenido previsto</h2>
+                <ul>
+                    <li>Tarjeta personalizada</li>
+                    <li>Rosa decorativa</li>
+                    <li>Pastelito</li>
+                    <li>Refresco pequeño</li>
+                    <li>Accesorio o llavero</li>
+                </ul>
+            </section>
+        </aside>
+
+        <section class="viewer">
+            <div class="viewer__header">
+                <div>
+                    <span>Vista previa</span>
+                    <h2>Modelo tridimensional editable</h2>
+                </div>
+
+                <p>Usa el mouse para rotar, acercar o alejar la escena.</p>
+            </div>
+
+            <div id="canvas-container" class="canvas-container">
+                <div id="loading" class="loading">Preparando simulación 3D...</div>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
