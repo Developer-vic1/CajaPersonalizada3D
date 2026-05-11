@@ -11,6 +11,7 @@
         "preview": "vite preview --host 0.0.0.0"
     },
     "dependencies": {
+        "qrcode": "^1.5.4",
         "three": "^0.170.0"
     },
     "devDependencies": {
