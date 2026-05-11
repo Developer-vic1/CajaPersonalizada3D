@@ -6,95 +6,271 @@ import {
     setMeshShadow,
 } from "../utils/dimensions.js";
 
-const LOGO_PATHS = {
+export const RESIN_KEYCHAIN_VERSION = "2.0.0";
+
+export const RESIN_KEYCHAIN_SHAPES = Object.freeze({
+    CIRCLE: "circle",
+    ROUNDED_RECT: "rounded-rect",
+    SHIELD: "shield",
+    TAG: "tag",
+    DROP: "drop",
+});
+
+export const RESIN_KEYCHAIN_STYLES = Object.freeze({
+    PREMIUM_GOLD: "premium-gold",
+    ACADEMIC: "academic",
+    BOLIVIA_2026: "bolivia-2026",
+    DARK_ELEGANT: "dark-elegant",
+    CLEAR_MINIMAL: "clear-minimal",
+});
+
+export const RESIN_KEYCHAIN_ORIENTATION = Object.freeze({
+    FLAT: "flat",
+    LEANING: "leaning",
+    HANGING: "hanging",
+});
+
+const LOGO_PATHS = Object.freeze({
     claro: "/image/Logo-Claro.png",
     oscuro: "/image/Logo-Oscuro.png",
-};
+});
 
-const DEFAULT_RESIN_OPTIONS = {
-    bodyColor: "#f2eee7",
+const DEFAULT_OPTIONS = Object.freeze({
+    shape: RESIN_KEYCHAIN_SHAPES.ROUNDED_RECT,
+    style: RESIN_KEYCHAIN_STYLES.PREMIUM_GOLD,
+    orientation: RESIN_KEYCHAIN_ORIENTATION.FLAT,
+
+    width: 0.72,
+    height: 0.92,
+    depth: 0.115,
+
+    bodyColor: "#fff7e8",
     innerGlowColor: "#fff8df",
-    glitterColor: "#fff7d1",
-    accentColor: "#ff9b22",
-    engravingColor: "#7a4f2a",
-    opacity: 0.9,
-    transmission: 0.34,
-    roughness: 0.14,
-    thickness: 0.48,
+    accentColor: "#c59a4a",
+    secondaryAccent: "#b92d2d",
+    greenAccent: "#2f7d55",
+
+    opacity: 0.72,
+    transmission: 0.38,
+    roughness: 0.08,
+    thickness: 0.42,
     metalness: 0.02,
-    ior: 1.45,
+    ior: 1.46,
     clearcoat: 1,
-    clearcoatRoughness: 0.06,
-    logoVariant: "claro",
-    logoScale: [0.54, 0.54, 0.54],
-    badgeScale: [0.64, 0.64, 0.64],
+    clearcoatRoughness: 0.045,
+
+    borderColor: "#c59a4a",
     ringColor: "#d6d6d6",
-    ringMetalness: 0.86,
-    ringRoughness: 0.2,
     chainColor: "#c9c9c9",
-    labelText: "2026",
-    labelSubtitle: "KickOff",
-    showBadge: true,
-    showGlitter: true,
+    glitterColor: "#fff3b6",
+    engravingColor: "#7a4f2a",
+
+    logoVariant: "claro",
+    logoScale: 0.56,
+
+    labelText: "SIS",
+    labelSubtitle: "KickOff 2026",
+    labelFooter: "UNIFRANZ",
+
+    showBody: true,
+    showInnerGlow: true,
+    showBorder: true,
+    showLogo: true,
     showRing: true,
     showChain: true,
     showEngraving: true,
-    showHighlight: true,
+    showGlitter: true,
+    showHighlights: true,
     showShadow: true,
-    glitterCount: 34,
-};
+    showConnectorHole: true,
+    showColorInclusion: true,
+
+    glitterCount: 46,
+    renderOrder: 8,
+});
+
+const STYLE_PRESETS = Object.freeze({
+    [RESIN_KEYCHAIN_STYLES.PREMIUM_GOLD]: Object.freeze({
+        bodyColor: "#fff7e8",
+        innerGlowColor: "#fff8df",
+        accentColor: "#c59a4a",
+        secondaryAccent: "#b92d2d",
+        greenAccent: "#2f7d55",
+        borderColor: "#c59a4a",
+        engravingColor: "#7a4f2a",
+        logoVariant: "claro",
+    }),
+
+    [RESIN_KEYCHAIN_STYLES.ACADEMIC]: Object.freeze({
+        bodyColor: "#eef6ff",
+        innerGlowColor: "#dff0ff",
+        accentColor: "#2f86c7",
+        secondaryAccent: "#c59a4a",
+        greenAccent: "#2f7d55",
+        borderColor: "#2f86c7",
+        engravingColor: "#111827",
+        logoVariant: "claro",
+    }),
+
+    [RESIN_KEYCHAIN_STYLES.BOLIVIA_2026]: Object.freeze({
+        bodyColor: "#fff7e8",
+        innerGlowColor: "#fff3c4",
+        accentColor: "#f0c84b",
+        secondaryAccent: "#b92d2d",
+        greenAccent: "#2f7d55",
+        borderColor: "#f0c84b",
+        engravingColor: "#2b2118",
+        logoVariant: "claro",
+    }),
+
+    [RESIN_KEYCHAIN_STYLES.DARK_ELEGANT]: Object.freeze({
+        bodyColor: "#221811",
+        innerGlowColor: "#49331d",
+        accentColor: "#c59a4a",
+        secondaryAccent: "#8b1f1f",
+        greenAccent: "#2f7d55",
+        borderColor: "#e9c678",
+        engravingColor: "#fff7e8",
+        logoVariant: "oscuro",
+        opacity: 0.78,
+        transmission: 0.18,
+    }),
+
+    [RESIN_KEYCHAIN_STYLES.CLEAR_MINIMAL]: Object.freeze({
+        bodyColor: "#f8fbff",
+        innerGlowColor: "#ffffff",
+        accentColor: "#c59a4a",
+        secondaryAccent: "#374151",
+        greenAccent: "#2f7d55",
+        borderColor: "#d6d6d6",
+        engravingColor: "#111827",
+        logoVariant: "claro",
+        opacity: 0.62,
+        transmission: 0.52,
+    }),
+});
 
 const textureLoader = new THREE.TextureLoader();
 const logoTextureCache = new Map();
+
+function normalizeOptions(config = {}, extraOptions = {}) {
+    const source = config.keychain ?? config.resinKeychain ?? config;
+    const visual = config.visual ?? config.sceneConfig?.visual ?? {};
+    const project = config.project ?? config.content?.project ?? {};
+    const product = config.product ?? config.sceneConfig?.product ?? {};
+
+    const style =
+        source.style ??
+        visual.keychainStyle ??
+        RESIN_KEYCHAIN_STYLES.PREMIUM_GOLD;
+
+    const preset =
+        STYLE_PRESETS[style] ??
+        STYLE_PRESETS[RESIN_KEYCHAIN_STYLES.PREMIUM_GOLD];
+
+    return {
+        ...DEFAULT_OPTIONS,
+        ...preset,
+        ...source,
+        ...extraOptions,
+        style,
+
+        accentColor:
+            visual.accentColor ??
+            source.accentColor ??
+            preset.accentColor,
+
+        logoVariant:
+            source.logoVariant ??
+            product.logoVariant ??
+            preset.logoVariant ??
+            DEFAULT_OPTIONS.logoVariant,
+
+        labelText:
+            source.labelText ??
+            project.careerShort ??
+            DEFAULT_OPTIONS.labelText,
+
+        labelSubtitle:
+            source.labelSubtitle ??
+            project.teamName ??
+            DEFAULT_OPTIONS.labelSubtitle,
+
+        labelFooter:
+            source.labelFooter ??
+            project.university ??
+            DEFAULT_OPTIONS.labelFooter,
+    };
+}
 
 function getLogoPath(variant = "claro") {
     return LOGO_PATHS[variant] ?? LOGO_PATHS.claro;
 }
 
-function createFallbackLogoTexture(variant = "claro") {
+function createFallbackLogoTexture(options = {}) {
     const canvas = document.createElement("canvas");
-    canvas.width = 512;
-    canvas.height = 512;
+    canvas.width = 768;
+    canvas.height = 768;
 
     const ctx = canvas.getContext("2d");
-    const isDark = variant === "oscuro";
+    const isDark = options.logoVariant === "oscuro";
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = isDark ? "#1f1b18" : "#fff7e8";
+
+    const gradient = ctx.createRadialGradient(384, 320, 80, 384, 384, 360);
+    gradient.addColorStop(0, isDark ? "#2b2118" : "#fffdf8");
+    gradient.addColorStop(1, isDark ? "#111111" : "#fff7e8");
+
+    ctx.fillStyle = gradient;
     ctx.beginPath();
-    ctx.arc(256, 256, 218, 0, Math.PI * 2);
+    ctx.arc(384, 384, 305, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.strokeStyle = "#ff9b22";
-    ctx.lineWidth = 18;
+    ctx.strokeStyle = options.accentColor ?? "#c59a4a";
+    ctx.lineWidth = 22;
     ctx.stroke();
 
     ctx.fillStyle = isDark ? "#fff7e8" : "#2b2118";
-    ctx.font = "bold 132px Arial";
+    ctx.font = "900 150px Arial, Helvetica, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("SIS", 256, 238);
+    ctx.fillText("SIS", 384, 340);
 
-    ctx.font = "bold 42px Arial";
-    ctx.fillText("LOGO", 256, 340);
+    ctx.fillStyle = options.accentColor ?? "#c59a4a";
+    ctx.font = "800 46px Arial, Helvetica, sans-serif";
+    ctx.fillText("UNIFRANZ", 384, 475);
+
+    ctx.fillStyle = isDark ? "#fff7e8" : "#2b2118";
+    ctx.font = "800 34px Arial, Helvetica, sans-serif";
+    ctx.fillText("2026", 384, 545);
 
     const texture = new THREE.CanvasTexture(canvas);
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.anisotropy = 8;
     texture.needsUpdate = true;
 
+    texture.userData = {
+        generatedBy: "ResinKeychainFallbackLogo",
+        variant: options.logoVariant,
+    };
+
     return texture;
 }
 
-function loadLogoTexture(variant = "claro") {
-    const normalizedVariant = variant === "oscuro" ? "oscuro" : "claro";
-    const path = getLogoPath(normalizedVariant);
+function loadLogoTexture(options = {}) {
+    const variant = options.logoVariant === "oscuro" ? "oscuro" : "claro";
+    const path = getLogoPath(variant);
+    const cacheKey = `${path}:${options.accentColor}`;
 
-    if (logoTextureCache.has(path)) {
-        return logoTextureCache.get(path).clone();
+    if (logoTextureCache.has(cacheKey)) {
+        return logoTextureCache.get(cacheKey).clone();
     }
 
-    const fallback = createFallbackLogoTexture(normalizedVariant);
+    const fallback = createFallbackLogoTexture({
+        ...options,
+        logoVariant: variant,
+    });
+
     const texture = textureLoader.load(
         path,
         (loadedTexture) => {
@@ -104,50 +280,118 @@ function loadLogoTexture(variant = "claro") {
         },
         undefined,
         () => {
-            console.warn(`No se pudo cargar el logo: ${path}. Se usará textura fallback.`);
+            texture.image = fallback.image;
+            texture.needsUpdate = true;
         },
     );
 
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.anisotropy = 8;
     texture.needsUpdate = true;
-    texture.userData.fallback = fallback;
+    texture.userData = {
+        generatedBy: "ResinKeychainLogo",
+        path,
+        variant,
+        fallback,
+    };
 
-    logoTextureCache.set(path, texture);
+    logoTextureCache.set(cacheKey, texture);
 
     return texture.clone();
 }
 
-function createResinShape() {
+function createRoundedRectShape(width, height, radius) {
+    const x = -width / 2;
+    const y = -height / 2;
     const shape = new THREE.Shape();
 
-    shape.moveTo(-0.2, 0.74);
-    shape.bezierCurveTo(0.08, 0.83, 0.3, 0.64, 0.27, 0.38);
-    shape.bezierCurveTo(0.24, 0.08, 0.05, -0.2, -0.08, -0.48);
-    shape.bezierCurveTo(-0.18, -0.7, -0.08, -0.9, 0.08, -1.08);
-    shape.bezierCurveTo(0.24, -1.25, 0.2, -1.4, 0.03, -1.43);
-    shape.bezierCurveTo(-0.18, -1.42, -0.38, -1.25, -0.52, -1.0);
-    shape.bezierCurveTo(-0.68, -0.7, -0.72, -0.38, -0.63, -0.02);
-    shape.bezierCurveTo(-0.58, 0.18, -0.54, 0.38, -0.52, 0.54);
-    shape.bezierCurveTo(-0.49, 0.7, -0.37, 0.8, -0.2, 0.74);
+    shape.moveTo(x + radius, y);
+    shape.lineTo(x + width - radius, y);
+    shape.quadraticCurveTo(x + width, y, x + width, y + radius);
+    shape.lineTo(x + width, y + height - radius);
+    shape.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    shape.lineTo(x + radius, y + height);
+    shape.quadraticCurveTo(x, y + height, x, y + height - radius);
+    shape.lineTo(x, y + radius);
+    shape.quadraticCurveTo(x, y, x + radius, y);
 
     return shape;
 }
 
-function createAccentDropShape() {
+function createCircleShape(radius) {
+    const shape = new THREE.Shape();
+    shape.absarc(0, 0, radius, 0, Math.PI * 2, false);
+    return shape;
+}
+
+function createShieldShape(width, height) {
     const shape = new THREE.Shape();
 
-    shape.moveTo(0, 0.36);
-    shape.bezierCurveTo(0.22, 0.2, 0.28, -0.04, 0.14, -0.26);
-    shape.bezierCurveTo(0.04, -0.42, -0.1, -0.45, -0.2, -0.32);
-    shape.bezierCurveTo(-0.34, -0.14, -0.28, 0.16, 0, 0.36);
+    shape.moveTo(0, height / 2);
+    shape.bezierCurveTo(width * 0.34, height * 0.45, width * 0.43, height * 0.2, width * 0.38, -height * 0.08);
+    shape.bezierCurveTo(width * 0.34, -height * 0.36, width * 0.16, -height * 0.48, 0, -height * 0.55);
+    shape.bezierCurveTo(-width * 0.16, -height * 0.48, -width * 0.34, -height * 0.36, -width * 0.38, -height * 0.08);
+    shape.bezierCurveTo(-width * 0.43, height * 0.2, -width * 0.34, height * 0.45, 0, height / 2);
 
     return shape;
 }
 
-function createPhysicalMaterial(options) {
+function createTagShape(width, height) {
+    const shape = new THREE.Shape();
+
+    shape.moveTo(-width / 2, -height / 2 + 0.12);
+    shape.lineTo(-width / 2, height / 2 - 0.1);
+    shape.quadraticCurveTo(-width / 2, height / 2, -width / 2 + 0.1, height / 2);
+    shape.lineTo(width / 2 - 0.18, height / 2);
+    shape.lineTo(width / 2, height / 2 - 0.18);
+    shape.lineTo(width / 2, -height / 2 + 0.1);
+    shape.quadraticCurveTo(width / 2, -height / 2, width / 2 - 0.1, -height / 2);
+    shape.lineTo(-width / 2 + 0.1, -height / 2);
+    shape.quadraticCurveTo(-width / 2, -height / 2, -width / 2, -height / 2 + 0.12);
+
+    return shape;
+}
+
+function createDropShape(width, height) {
+    const shape = new THREE.Shape();
+
+    shape.moveTo(0, height / 2);
+    shape.bezierCurveTo(width * 0.42, height * 0.18, width * 0.36, -height * 0.3, 0, -height * 0.5);
+    shape.bezierCurveTo(-width * 0.36, -height * 0.3, -width * 0.42, height * 0.18, 0, height / 2);
+
+    return shape;
+}
+
+function createMainShape(options) {
+    if (options.shape === RESIN_KEYCHAIN_SHAPES.CIRCLE) {
+        return createCircleShape(Math.min(options.width, options.height) * 0.43);
+    }
+
+    if (options.shape === RESIN_KEYCHAIN_SHAPES.SHIELD) {
+        return createShieldShape(options.width, options.height);
+    }
+
+    if (options.shape === RESIN_KEYCHAIN_SHAPES.TAG) {
+        return createTagShape(options.width, options.height);
+    }
+
+    if (options.shape === RESIN_KEYCHAIN_SHAPES.DROP) {
+        return createDropShape(options.width, options.height);
+    }
+
+    return createRoundedRectShape(options.width, options.height, 0.13);
+}
+
+function createConnectorHoleShape(options) {
+    const hole = new THREE.Path();
+    const y = options.height * 0.38;
+    hole.absarc(0, y, 0.07, 0, Math.PI * 2, true);
+    return hole;
+}
+
+function createResinMaterial(options) {
     return new THREE.MeshPhysicalMaterial({
-        name: "ResinBodyMaterial",
+        name: "ResinKeychainBodyMaterial",
         color: options.bodyColor,
         transparent: true,
         opacity: options.opacity,
@@ -156,50 +400,73 @@ function createPhysicalMaterial(options) {
         transmission: options.transmission,
         thickness: options.thickness,
         ior: options.ior,
-        reflectivity: 0.65,
         clearcoat: options.clearcoat,
         clearcoatRoughness: options.clearcoatRoughness,
+        reflectivity: 0.75,
         attenuationColor: new THREE.Color(options.bodyColor),
-        attenuationDistance: 1.8,
+        attenuationDistance: 1.6,
         side: THREE.DoubleSide,
     });
 }
 
-function createMetalMaterial(options) {
+function createGoldMaterial(options) {
     return new THREE.MeshStandardMaterial({
-        name: "ResinMetalMaterial",
-        color: options.ringColor,
-        metalness: options.ringMetalness,
-        roughness: options.ringRoughness,
+        name: "ResinKeychainGoldMaterial",
+        color: options.borderColor,
+        roughness: 0.3,
+        metalness: 0.42,
     });
 }
 
-function createBadgeMaterial(texture, opacity = 1) {
-    return new THREE.MeshBasicMaterial({
-        name: "ResinBadgeLogoMaterial",
-        map: texture,
+function createMetalMaterial(name, color, metalness = 0.82, roughness = 0.22) {
+    return new THREE.MeshStandardMaterial({
+        name,
+        color,
+        metalness,
+        roughness,
+    });
+}
+
+function createGlassOverlayMaterial(options) {
+    return new THREE.MeshPhysicalMaterial({
+        name: "ResinKeychainGlassOverlayMaterial",
+        color: "#ffffff",
         transparent: true,
-        opacity,
+        opacity: 0.16,
+        roughness: 0.03,
+        metalness: 0,
+        transmission: 0.56,
+        thickness: 0.12,
+        ior: 1.46,
+        clearcoat: 1,
+        clearcoatRoughness: 0.02,
         side: THREE.DoubleSide,
     });
 }
 
 function createResinBody(options) {
-    const geometry = new THREE.ExtrudeGeometry(createResinShape(), {
-        depth: 0.2,
+    const shape = createMainShape(options);
+
+    if (options.showConnectorHole) {
+        shape.holes.push(createConnectorHoleShape(options));
+    }
+
+    const geometry = new THREE.ExtrudeGeometry(shape, {
+        depth: options.depth,
+        steps: 1,
         bevelEnabled: true,
-        bevelThickness: 0.038,
-        bevelSize: 0.045,
-        bevelSegments: 6,
-        curveSegments: 34,
+        bevelThickness: 0.026,
+        bevelSize: 0.026,
+        bevelSegments: 8,
+        curveSegments: 48,
     });
 
     geometry.center();
     geometry.computeVertexNormals();
 
-    const mesh = new THREE.Mesh(geometry, createPhysicalMaterial(options));
-    mesh.name = "ResinBody";
-    mesh.rotation.set(0, 0.06, 0);
+    const mesh = new THREE.Mesh(geometry, createResinMaterial(options));
+    mesh.name = "ResinKeychainBody";
+    mesh.visible = Boolean(options.showBody);
 
     setMeshShadow(mesh, true, true);
 
@@ -207,296 +474,309 @@ function createResinBody(options) {
 }
 
 function createInnerGlow(options) {
-    const geometry = new THREE.ExtrudeGeometry(createResinShape(), {
-        depth: 0.055,
-        bevelEnabled: false,
-        curveSegments: 28,
+    const shape = createMainShape({
+        ...options,
+        width: options.width * 0.84,
+        height: options.height * 0.84,
     });
 
-    geometry.center();
+    const geometry = new THREE.ShapeGeometry(shape, 48);
 
     const material = new THREE.MeshBasicMaterial({
-        name: "ResinInnerGlowMaterial",
+        name: "ResinKeychainInnerGlowMaterial",
         color: options.innerGlowColor,
+        transparent: true,
+        opacity: 0.24,
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+    });
+
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.name = "ResinKeychainInnerGlow";
+    mesh.position.z = options.depth / 2 + 0.006;
+    mesh.visible = Boolean(options.showInnerGlow);
+    mesh.renderOrder = options.renderOrder;
+
+    return mesh;
+}
+
+function createColorInclusion(options) {
+    const group = new THREE.Group();
+    group.name = "ResinKeychainColorInclusion";
+    group.visible = Boolean(options.showColorInclusion);
+
+    const materialRed = new THREE.MeshBasicMaterial({
+        name: "ResinInclusionRedMaterial",
+        color: options.secondaryAccent,
+        transparent: true,
+        opacity: 0.28,
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+    });
+
+    const materialGreen = new THREE.MeshBasicMaterial({
+        name: "ResinInclusionGreenMaterial",
+        color: options.greenAccent,
         transparent: true,
         opacity: 0.2,
         side: THREE.DoubleSide,
         blending: THREE.AdditiveBlending,
+        depthWrite: false,
     });
 
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.name = "ResinInnerGlow";
-    mesh.scale.set(0.88, 0.88, 0.88);
-    mesh.position.z = 0.018;
-
-    return mesh;
-}
-
-function createAccentInclusion(options) {
-    const geometry = new THREE.ExtrudeGeometry(createAccentDropShape(), {
-        depth: 0.018,
-        bevelEnabled: true,
-        bevelThickness: 0.006,
-        bevelSize: 0.006,
-        bevelSegments: 2,
-        curveSegments: 22,
-    });
-
-    geometry.center();
-
-    const material = new THREE.MeshBasicMaterial({
-        name: "ResinAccentInclusionMaterial",
-        color: options.accentColor,
-        transparent: true,
-        opacity: 0.32,
-        side: THREE.DoubleSide,
-        blending: THREE.AdditiveBlending,
-    });
-
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.name = "ResinAccentInclusion";
-    mesh.position.set(-0.19, -0.35, 0.07);
-    mesh.rotation.set(0.08, -0.16, -0.34);
-    mesh.scale.set(0.86, 0.86, 0.86);
-
-    return mesh;
-}
-
-function createTopCap(options) {
-    const material = new THREE.MeshPhysicalMaterial({
-        name: "ResinCapMaterial",
-        color: "#efe6d9",
-        transparent: true,
-        opacity: 0.92,
-        roughness: 0.14,
-        metalness: 0.02,
-        transmission: 0.24,
-        thickness: 0.18,
-        ior: 1.45,
-        clearcoat: 1,
-        clearcoatRoughness: 0.07,
-    });
-
-    const mesh = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.115, 0.15, 0.12, 36),
-        material,
+    const red = new THREE.Mesh(
+        new THREE.CircleGeometry(0.17, 48),
+        materialRed,
     );
+    red.name = "ResinRedInclusion";
+    red.position.set(-options.width * 0.19, -options.height * 0.12, options.depth / 2 + 0.011);
+    red.scale.set(1, 0.62, 1);
+    red.rotation.z = -0.35;
 
-    mesh.name = "ResinCap";
-    mesh.position.set(-0.06, 0.69, 0.006);
-    mesh.scale.set(1, 0.7, 0.88);
-    mesh.rotation.z = -0.12;
-
-    setMeshShadow(mesh, true, true);
-
-    return mesh;
-}
-
-function createRing(options) {
-    const group = new THREE.Group();
-    group.name = "ResinRingGroup";
-
-    const material = createMetalMaterial(options);
-
-    const ring = new THREE.Mesh(
-        new THREE.TorusGeometry(0.12, 0.018, 18, 54),
-        material,
+    const green = new THREE.Mesh(
+        new THREE.CircleGeometry(0.13, 48),
+        materialGreen,
     );
-    ring.name = "ResinRing";
-    ring.rotation.x = Math.PI / 2;
-    ring.position.set(-0.025, 0.885, 0.002);
+    green.name = "ResinGreenInclusion";
+    green.position.set(options.width * 0.18, -options.height * 0.22, options.depth / 2 + 0.012);
+    green.scale.set(1.25, 0.55, 1);
+    green.rotation.z = 0.38;
 
-    const connector = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.019, 0.019, 0.1, 18),
-        material,
-    );
-    connector.name = "ResinRingConnector";
-    connector.position.set(-0.035, 0.79, 0.002);
-    connector.rotation.z = 0.08;
-
-    setMeshShadow(ring, true, true);
-    setMeshShadow(connector, true, true);
-
-    group.add(ring, connector);
+    group.add(red, green);
 
     return group;
 }
 
-function createChain(options) {
+function createBorder(options) {
     const group = new THREE.Group();
-    group.name = "ResinMiniChain";
+    group.name = "ResinKeychainBorder";
+    group.visible = Boolean(options.showBorder);
 
-    const material = new THREE.MeshStandardMaterial({
-        name: "ResinChainMaterial",
-        color: options.chainColor,
-        metalness: 0.82,
-        roughness: 0.24,
+    const material = createGoldMaterial(options);
+    const shape = createMainShape({
+        ...options,
+        width: options.width * 1.015,
+        height: options.height * 1.015,
     });
 
-    for (let index = 0; index < 3; index += 1) {
-        const link = new THREE.Mesh(
-            new THREE.TorusGeometry(0.075, 0.011, 12, 34),
-            material,
-        );
-
-        link.name = `ResinChainLink_${index + 1}`;
-        link.position.set(-0.02, 1.01 + index * 0.095, 0.002);
-        link.rotation.set(Math.PI / 2, 0, index % 2 === 0 ? 0 : Math.PI / 2);
-
-        setMeshShadow(link, true, true);
-        group.add(link);
+    if (options.showConnectorHole) {
+        shape.holes.push(createConnectorHoleShape(options));
     }
+
+    const geometry = new THREE.ExtrudeGeometry(shape, {
+        depth: 0.018,
+        steps: 1,
+        bevelEnabled: true,
+        bevelThickness: 0.006,
+        bevelSize: 0.006,
+        bevelSegments: 3,
+        curveSegments: 48,
+    });
+
+    geometry.center();
+    geometry.computeVertexNormals();
+
+    const border = new THREE.Mesh(geometry, material);
+    border.name = "ResinGoldOuterRim";
+    border.position.z = -options.depth / 2 - 0.01;
+    border.scale.set(1.018, 1.018, 1);
+
+    const frontLine = new THREE.Mesh(
+        new THREE.RingGeometry(0.058, 0.073, 48),
+        material.clone(),
+    );
+    frontLine.name = "ResinConnectorHoleGoldRim";
+    frontLine.position.set(0, options.height * 0.38, options.depth / 2 + 0.023);
+
+    group.add(border, frontLine);
+    setGroupShadow(group, true, true);
 
     return group;
 }
 
 function createLogoBadge(options) {
-    const badgeGroup = new THREE.Group();
-    badgeGroup.name = "ResinBadgeGroup";
+    const group = new THREE.Group();
+    group.name = "ResinKeychainLogoBadge";
+    group.visible = Boolean(options.showLogo);
 
-    const baseMaterial = new THREE.MeshPhysicalMaterial({
-        name: "ResinBadgeBaseMaterial",
-        color: "#fff9ef",
-        transparent: true,
-        opacity: 0.96,
-        roughness: 0.1,
-        metalness: 0.03,
-        transmission: 0.14,
-        thickness: 0.08,
-        clearcoat: 1,
-        clearcoatRoughness: 0.04,
-    });
-
-    const base = new THREE.Mesh(new THREE.CircleGeometry(0.24, 64), baseMaterial);
-    base.name = "ResinBadgeBase";
-    base.position.z = 0.012;
-
-    const logo = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.36, 0.36),
-        createBadgeMaterial(loadLogoTexture(options.logoVariant), options.opacity),
-    );
-    logo.name = "ResinBadgeLogo";
-    logo.position.z = 0.03;
-    logo.scale.set(options.logoScale[0], options.logoScale[1], options.logoScale[2]);
-
-    const outline = new THREE.Mesh(
-        new THREE.TorusGeometry(0.246, 0.012, 14, 56),
-        new THREE.MeshStandardMaterial({
-            name: "ResinBadgeOutlineMaterial",
-            color: options.accentColor,
-            metalness: 0.18,
-            roughness: 0.34,
+    const base = new THREE.Mesh(
+        new THREE.CircleGeometry(0.215, 72),
+        new THREE.MeshPhysicalMaterial({
+            name: "ResinLogoBadgeBaseMaterial",
+            color: "#fffdf8",
+            transparent: true,
+            opacity: 0.94,
+            roughness: 0.08,
+            metalness: 0.02,
+            transmission: 0.18,
+            thickness: 0.08,
+            clearcoat: 1,
+            clearcoatRoughness: 0.03,
+            side: THREE.DoubleSide,
         }),
     );
-    outline.name = "ResinBadgeOutline";
-    outline.position.z = 0.022;
-    outline.rotation.x = Math.PI / 2;
+    base.name = "ResinLogoBadgeBase";
+    base.position.z = options.depth / 2 + 0.026;
 
-    setMeshShadow(base, true, true);
-    setMeshShadow(logo, false, true);
-    setMeshShadow(outline, true, true);
+    const logoTexture = loadLogoTexture(options);
 
-    badgeGroup.add(base, logo, outline);
-    badgeGroup.position.set(-0.11, 0.16, 0.04);
-    badgeGroup.rotation.set(0.02, -0.22, -0.08);
-    badgeGroup.scale.set(options.badgeScale[0], options.badgeScale[1], options.badgeScale[2]);
+    const logo = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.32, 0.32),
+        new THREE.MeshBasicMaterial({
+            name: "ResinLogoBadgeTextureMaterial",
+            map: logoTexture,
+            transparent: true,
+            opacity: 0.98,
+            side: THREE.DoubleSide,
+        }),
+    );
+    logo.name = "ResinLogoBadgeTexture";
+    logo.position.z = options.depth / 2 + 0.034;
+    logo.scale.setScalar(options.logoScale);
 
-    badgeGroup.userData = {
+    const ring = new THREE.Mesh(
+        new THREE.TorusGeometry(0.218, 0.009, 12, 72),
+        createGoldMaterial(options),
+    );
+    ring.name = "ResinLogoBadgeGoldRing";
+    ring.rotation.x = Math.PI / 2;
+    ring.position.z = options.depth / 2 + 0.03;
+
+    group.add(base, logo, ring);
+    group.position.set(0, 0.06, 0);
+    group.userData = {
         editable: true,
-        role: "badge",
-        minScale: 0.25,
-        maxScale: 1.4,
+        role: "logo-badge",
         logoVariant: options.logoVariant,
+        minScale: 0.35,
+        maxScale: 1.25,
     };
 
-    return badgeGroup;
+    return group;
 }
 
 function createEngravingTexture(options) {
     const canvas = document.createElement("canvas");
-    canvas.width = 1024;
-    canvas.height = 384;
+    canvas.width = 1200;
+    canvas.height = 460;
 
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = "rgba(255, 247, 232, 0.0)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.strokeStyle = "rgba(122, 79, 42, 0.42)";
+    ctx.strokeStyle = "rgba(197,154,74,0.38)";
     ctx.lineWidth = 10;
-    ctx.strokeRect(32, 32, canvas.width - 64, canvas.height - 64);
+    roundedRectPath(ctx, 40, 40, canvas.width - 80, canvas.height - 80, 42);
+    ctx.stroke();
 
     ctx.fillStyle = options.engravingColor;
-    ctx.font = "bold 104px Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(options.labelText, canvas.width / 2, 158);
 
-    ctx.font = "bold 46px Arial";
-    ctx.fillText(options.labelSubtitle, canvas.width / 2, 260);
+    ctx.font = "900 118px Arial, Helvetica, sans-serif";
+    ctx.fillText(String(options.labelText).slice(0, 12), canvas.width / 2, 155);
+
+    ctx.font = "800 48px Arial, Helvetica, sans-serif";
+    ctx.fillText(String(options.labelSubtitle).slice(0, 24), canvas.width / 2, 270);
+
+    ctx.font = "700 36px Arial, Helvetica, sans-serif";
+    ctx.fillText(String(options.labelFooter).slice(0, 24), canvas.width / 2, 355);
 
     const texture = new THREE.CanvasTexture(canvas);
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.anisotropy = 8;
     texture.needsUpdate = true;
 
+    texture.userData = {
+        generatedBy: "ResinKeychainEngraving",
+        labelText: options.labelText,
+        labelSubtitle: options.labelSubtitle,
+        labelFooter: options.labelFooter,
+    };
+
     return texture;
+}
+
+function roundedRectPath(ctx, x, y, width, height, radius) {
+    const safeRadius = Math.min(radius, width / 2, height / 2);
+
+    ctx.beginPath();
+    ctx.moveTo(x + safeRadius, y);
+    ctx.lineTo(x + width - safeRadius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + safeRadius);
+    ctx.lineTo(x + width, y + height - safeRadius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - safeRadius, y + height);
+    ctx.lineTo(x + safeRadius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - safeRadius);
+    ctx.lineTo(x, y + safeRadius);
+    ctx.quadraticCurveTo(x, y, x + safeRadius, y);
+    ctx.closePath();
 }
 
 function createEngraving(options) {
     const material = new THREE.MeshBasicMaterial({
-        name: "ResinEngravingMaterial",
+        name: "ResinKeychainEngravingMaterial",
         map: createEngravingTexture(options),
         transparent: true,
-        opacity: 0.52,
+        opacity: 0.62,
         side: THREE.DoubleSide,
+        depthWrite: false,
     });
 
-    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.18), material);
-    mesh.name = "ResinEngraving";
-    mesh.position.set(-0.2, -0.55, 0.11);
-    mesh.rotation.set(0.03, -0.12, -0.15);
-    mesh.renderOrder = 6;
+    const mesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(options.width * 0.68, options.height * 0.25),
+        material,
+    );
+
+    mesh.name = "ResinKeychainEngraving";
+    mesh.position.set(0, -options.height * 0.29, options.depth / 2 + 0.036);
+    mesh.renderOrder = options.renderOrder + 1;
+    mesh.visible = Boolean(options.showEngraving);
 
     return mesh;
 }
 
 function createGlitter(options) {
     const group = new THREE.Group();
-    group.name = "ResinGlitterGroup";
+    group.name = "ResinKeychainGlitter";
+    group.visible = Boolean(options.showGlitter);
 
-    const count = options.glitterCount;
-    const geometry = new THREE.BoxGeometry(0.024, 0.024, 0.004);
+    const count = Math.max(0, Number(options.glitterCount) || 0);
+    const geometry = new THREE.BoxGeometry(0.018, 0.018, 0.004);
     const material = new THREE.MeshStandardMaterial({
-        name: "ResinGlitterMaterial",
+        name: "ResinKeychainGlitterMaterial",
         color: options.glitterColor,
         emissive: "#fff3b6",
         emissiveIntensity: 0.14,
         roughness: 0.24,
-        metalness: 0.18,
+        metalness: 0.22,
     });
 
     const glitter = new THREE.InstancedMesh(geometry, material, count);
-    glitter.name = "ResinGlitterInstances";
+    glitter.name = "ResinKeychainGlitterInstances";
 
     const dummy = new THREE.Object3D();
 
     for (let index = 0; index < count; index += 1) {
         const t = index / Math.max(count - 1, 1);
         const angle = index * 2.399963;
-        const radial = 0.05 + (index % 7) * 0.032;
-        const x = -0.18 + Math.cos(angle) * radial * (0.7 + t * 0.4);
-        const y = 0.58 - t * 1.18 + Math.sin(index * 1.73) * 0.055;
-        const z = 0.04 + Math.sin(index * 0.9) * 0.018;
+        const radiusX = options.width * (0.08 + (index % 7) * 0.035);
+        const radiusY = options.height * (0.08 + (index % 5) * 0.028);
 
-        dummy.position.set(x, y, z);
+        dummy.position.set(
+            Math.cos(angle) * radiusX,
+            options.height * 0.28 - t * options.height * 0.58 + Math.sin(index * 1.72) * 0.025,
+            options.depth / 2 + 0.019 + Math.sin(index * 0.9) * 0.006,
+        );
+
         dummy.rotation.set(
             Math.sin(index * 0.51) * 0.8,
             Math.cos(index * 0.37) * 0.8,
             angle,
         );
-        dummy.scale.setScalar(0.65 + Math.sin(index * 1.21) * 0.22);
+
+        dummy.scale.setScalar(0.62 + Math.sin(index * 1.21) * 0.22);
         dummy.updateMatrix();
 
         glitter.setMatrixAt(index, dummy.matrix);
@@ -510,113 +790,268 @@ function createGlitter(options) {
     return group;
 }
 
-function createSpecularHighlights() {
+function createRing(options) {
     const group = new THREE.Group();
-    group.name = "ResinHighlights";
+    group.name = "ResinKeychainRing";
+    group.visible = Boolean(options.showRing);
+
+    const material = createMetalMaterial(
+        "ResinKeychainRingMaterial",
+        options.ringColor,
+        0.88,
+        0.19,
+    );
+
+    const ring = new THREE.Mesh(
+        new THREE.TorusGeometry(0.115, 0.014, 18, 64),
+        material,
+    );
+    ring.name = "ResinMainRing";
+    ring.rotation.x = Math.PI / 2;
+    ring.position.set(0, options.height * 0.55, 0.012);
+
+    const connector = new THREE.Mesh(
+        new THREE.TorusGeometry(0.058, 0.01, 14, 48),
+        material.clone(),
+    );
+    connector.name = "ResinSmallConnectorRing";
+    connector.rotation.x = Math.PI / 2;
+    connector.position.set(0, options.height * 0.42, 0.012);
+
+    group.add(ring, connector);
+    setGroupShadow(group, true, true);
+
+    return group;
+}
+
+function createChain(options) {
+    const group = new THREE.Group();
+    group.name = "ResinKeychainChain";
+    group.visible = Boolean(options.showChain);
+
+    const material = createMetalMaterial(
+        "ResinKeychainChainMaterial",
+        options.chainColor,
+        0.84,
+        0.24,
+    );
+
+    for (let index = 0; index < 3; index += 1) {
+        const link = new THREE.Mesh(
+            new THREE.TorusGeometry(0.065, 0.009, 12, 42),
+            material,
+        );
+
+        link.name = `ResinChainLink_${index + 1}`;
+        link.position.set(
+            0,
+            options.height * 0.67 + index * 0.078,
+            0.012,
+        );
+        link.rotation.set(Math.PI / 2, 0, index % 2 === 0 ? 0 : Math.PI / 2);
+
+        group.add(link);
+    }
+
+    setGroupShadow(group, true, true);
+
+    return group;
+}
+
+function createHighlights(options) {
+    const group = new THREE.Group();
+    group.name = "ResinKeychainHighlights";
+    group.visible = Boolean(options.showHighlights);
 
     const material = new THREE.MeshBasicMaterial({
-        name: "ResinHighlightMaterial",
+        name: "ResinKeychainHighlightMaterial",
         color: "#ffffff",
         transparent: true,
-        opacity: 0.16,
+        opacity: 0.18,
         side: THREE.DoubleSide,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
     });
 
-    const large = new THREE.Mesh(new THREE.PlaneGeometry(0.28, 0.92), material);
-    large.name = "ResinHighlightMain";
-    large.position.set(0.03, 0.06, 0.115);
-    large.rotation.set(0.08, -0.18, -0.24);
-    large.renderOrder = 7;
+    const main = new THREE.Mesh(
+        new THREE.PlaneGeometry(options.width * 0.16, options.height * 0.7),
+        material,
+    );
+    main.name = "ResinMainHighlight";
+    main.position.set(-options.width * 0.24, options.height * 0.02, options.depth / 2 + 0.045);
+    main.rotation.z = -0.22;
+    main.renderOrder = options.renderOrder + 2;
 
-    const small = new THREE.Mesh(new THREE.PlaneGeometry(0.08, 0.36), material.clone());
-    small.name = "ResinHighlightSmall";
+    const small = new THREE.Mesh(
+        new THREE.PlaneGeometry(options.width * 0.08, options.height * 0.32),
+        material.clone(),
+    );
+    small.name = "ResinSmallHighlight";
     small.material.opacity = 0.11;
-    small.position.set(-0.3, 0.24, 0.118);
-    small.rotation.set(0.08, -0.14, -0.3);
-    small.renderOrder = 7;
+    small.position.set(options.width * 0.22, options.height * 0.15, options.depth / 2 + 0.046);
+    small.rotation.z = 0.18;
+    small.renderOrder = options.renderOrder + 2;
 
-    group.add(large, small);
+    group.add(main, small);
 
     return group;
 }
 
-function createContactShadow(materials) {
-    const shadowMaterial =
-        materials?.shadowSoft ||
-        new THREE.MeshBasicMaterial({
-            color: "#000000",
-            transparent: true,
-            opacity: 0.2,
-            side: THREE.DoubleSide,
-        });
+function createGlassOverlay(options) {
+    const shape = createMainShape({
+        ...options,
+        width: options.width * 0.96,
+        height: options.height * 0.96,
+    });
 
-    const mesh = new THREE.Mesh(new THREE.CircleGeometry(0.56, 48), shadowMaterial);
-    mesh.name = "ResinContactShadow";
-    mesh.rotation.x = -Math.PI / 2;
-    mesh.position.set(-0.08, -0.82, 0);
-    mesh.scale.set(1.08, 0.46, 1);
+    const geometry = new THREE.ShapeGeometry(shape, 48);
+    const mesh = new THREE.Mesh(geometry, createGlassOverlayMaterial(options));
+
+    mesh.name = "ResinKeychainGlassOverlay";
+    mesh.position.z = options.depth / 2 + 0.041;
+    mesh.renderOrder = options.renderOrder + 1;
 
     return mesh;
 }
 
-function getSafeScale(scale, minScale, maxScale) {
-    const nextScale = Array.isArray(scale) ? scale : [scale, scale, scale];
-
-    return nextScale.map((value) => THREE.MathUtils.clamp(value, minScale, maxScale));
-}
-
-export function createResinKeychain(config, materials = {}, options = {}) {
-    const mergedOptions = {
-        ...DEFAULT_RESIN_OPTIONS,
-        ...options,
-    };
-
-    const group = new THREE.Group();
-    group.name = "KickOffBoxResinKeychain";
-
-    if (mergedOptions.showShadow) group.add(createContactShadow(materials));
-
-    group.add(
-        createResinBody(mergedOptions),
-        createInnerGlow(mergedOptions),
-        createAccentInclusion(mergedOptions),
-        createTopCap(mergedOptions),
-    );
-
-    if (mergedOptions.showHighlight) group.add(createSpecularHighlights());
-    if (mergedOptions.showGlitter) group.add(createGlitter(mergedOptions));
-    if (mergedOptions.showBadge) group.add(createLogoBadge(mergedOptions));
-    if (mergedOptions.showRing) group.add(createRing(mergedOptions));
-    if (mergedOptions.showChain) group.add(createChain(mergedOptions));
-    if (mergedOptions.showEngraving) group.add(createEngraving(mergedOptions));
-
-    const layout = config?.contentLayout?.keychain ?? {};
-
-    applyTransform(group, {
-        position: layout.position ?? [2.15, 0.65, 1.58],
-        rotation: layout.rotation ?? [Math.PI / 2, 0, 0],
-        scale: layout.scale ?? [0.72, 0.72, 0.72],
+function createContactShadow(options) {
+    const material = new THREE.MeshBasicMaterial({
+        name: "ResinKeychainContactShadowMaterial",
+        color: "#000000",
+        transparent: true,
+        opacity: 0.17,
+        depthWrite: false,
+        side: THREE.DoubleSide,
     });
 
-    group.userData = {
-        type: "resin-keychain",
+    const shadow = new THREE.Mesh(
+        new THREE.CircleGeometry(0.48, 64),
+        material,
+    );
+
+    shadow.name = "ResinKeychainContactShadow";
+    shadow.rotation.x = -Math.PI / 2;
+    shadow.position.y = -options.height * 0.47;
+    shadow.position.z = -0.025;
+    shadow.scale.set(1.08, 0.48, 1);
+
+    return shadow;
+}
+
+function applyOrientation(group, options) {
+    if (options.orientation === RESIN_KEYCHAIN_ORIENTATION.LEANING) {
+        group.rotation.x += -0.16;
+        group.position.y += 0.05;
+    }
+
+    if (options.orientation === RESIN_KEYCHAIN_ORIENTATION.HANGING) {
+        group.rotation.x += -0.38;
+        group.position.y += 0.18;
+        group.position.z -= 0.08;
+    }
+}
+
+function applyConfigTransform(group, config = {}) {
+    const layout =
+        config.layout ??
+        config.transform ??
+        config.contentLayout?.keychain ??
+        {};
+
+    applyTransform(group, {
+        position: layout.position ?? [0.78, 0.34, 0.33],
+        rotation: layout.rotation ?? [-Math.PI / 2, 0, -0.12],
+        scale: layout.scale ?? [0.58, 0.58, 0.58],
+    });
+}
+
+function createMetadata(options) {
+    return {
+        objectType: "ResinKeychain",
+        version: RESIN_KEYCHAIN_VERSION,
+        shape: options.shape,
+        style: options.style,
+        orientation: options.orientation,
+        dimensions: {
+            width: options.width,
+            height: options.height,
+            depth: options.depth,
+        },
         editable: true,
         draggable: true,
         rotatable: true,
         scalable: true,
-        visibleInPresets: ["estandar", "premium"],
         minScale: 0.35,
-        maxScale: 1.8,
-        options: mergedOptions,
-        description:
-            "Souvenir de resina editable con logo integrado, brillo interno, aro metálico y acabado translúcido.",
+        maxScale: 1.4,
+        labelText: options.labelText,
+        labelSubtitle: options.labelSubtitle,
+        labelFooter: options.labelFooter,
+        logoVariant: options.logoVariant,
+        purpose: "physical-resin-acrylic-souvenir-keychain",
+        createdAt: new Date().toISOString(),
+    };
+}
+
+export function createResinKeychain(config = {}, materials = {}, textureSet = {}, extraOptions = {}) {
+    const options = normalizeOptions(config, extraOptions);
+
+    const group = new THREE.Group();
+    group.name = "KickOffBoxResinKeychain";
+    group.userData = createMetadata(options);
+
+    const shadow = createContactShadow(options);
+    const body = createResinBody(options);
+    const innerGlow = createInnerGlow(options);
+    const colorInclusion = createColorInclusion(options);
+    const border = createBorder(options);
+    const logoBadge = createLogoBadge(options);
+    const engraving = createEngraving(options);
+    const glitter = createGlitter(options);
+    const ring = createRing(options);
+    const chain = createChain(options);
+    const highlights = createHighlights(options);
+    const glassOverlay = createGlassOverlay(options);
+
+    if (options.showShadow) group.add(shadow);
+
+    group.add(
+        body,
+        innerGlow,
+        colorInclusion,
+        glitter,
+        border,
+        logoBadge,
+        engraving,
+        glassOverlay,
+        ring,
+        chain,
+        highlights,
+    );
+
+    group.userData.parts = {
+        shadow: shadow.name,
+        body: body.name,
+        innerGlow: innerGlow.name,
+        colorInclusion: colorInclusion.name,
+        glitter: glitter.name,
+        border: border.name,
+        logoBadge: logoBadge.name,
+        engraving: engraving.name,
+        glassOverlay: glassOverlay.name,
+        ring: ring.name,
+        chain: chain.name,
+        highlights: highlights.name,
     };
 
+    applyConfigTransform(group, config);
+    applyOrientation(group, options);
     setGroupShadow(group, true, true);
 
     return group;
+}
+
+export function createKeychain(config = {}, materials = {}, textureSet = {}, extraOptions = {}) {
+    return createResinKeychain(config, materials, textureSet, extraOptions);
 }
 
 export function setResinKeychainTransform(keychain, { position, rotation, scale } = {}) {
@@ -627,80 +1062,62 @@ export function setResinKeychainTransform(keychain, { position, rotation, scale 
 
     if (scale) {
         const minScale = keychain.userData?.minScale ?? 0.35;
-        const maxScale = keychain.userData?.maxScale ?? 1.8;
-        const safeScale = getSafeScale(scale, minScale, maxScale);
-        keychain.scale.set(safeScale[0], safeScale[1], safeScale[2]);
+        const maxScale = keychain.userData?.maxScale ?? 1.4;
+        const values = Array.isArray(scale) ? scale : [scale, scale, scale];
+
+        keychain.scale.set(
+            THREE.MathUtils.clamp(values[0], minScale, maxScale),
+            THREE.MathUtils.clamp(values[1], minScale, maxScale),
+            THREE.MathUtils.clamp(values[2], minScale, maxScale),
+        );
     }
+
+    keychain.userData.updatedAt = new Date().toISOString();
 }
 
 export function setResinBadgePosition(keychain, { position, rotation, scale } = {}) {
-    const badge = keychain?.getObjectByName("ResinBadgeGroup");
+    const badge = keychain?.getObjectByName("ResinKeychainLogoBadge");
     if (!badge) return;
 
     if (position) badge.position.set(position[0], position[1], position[2]);
     if (rotation) badge.rotation.set(rotation[0], rotation[1], rotation[2]);
 
     if (scale) {
-        const minScale = badge.userData?.minScale ?? 0.25;
-        const maxScale = badge.userData?.maxScale ?? 1.4;
-        const safeScale = getSafeScale(scale, minScale, maxScale);
-        badge.scale.set(safeScale[0], safeScale[1], safeScale[2]);
+        const safeScale = Array.isArray(scale) ? scale : [scale, scale, scale];
+        badge.scale.set(
+            THREE.MathUtils.clamp(safeScale[0], 0.35, 1.25),
+            THREE.MathUtils.clamp(safeScale[1], 0.35, 1.25),
+            THREE.MathUtils.clamp(safeScale[2], 0.35, 1.25),
+        );
     }
 }
 
 export function setResinLogoVariant(keychain, variant = "claro") {
-    const logo = keychain?.getObjectByName("ResinBadgeLogo");
+    const logo = keychain?.getObjectByName("ResinLogoBadgeTexture");
     if (!logo?.material) return;
 
-    if (logo.material.map) logo.material.map.dispose();
+    disposeTexture(logo.material.map);
 
-    const texture = loadLogoTexture(variant);
+    const options = {
+        ...(keychain.userData ?? {}),
+        logoVariant: variant,
+    };
+
+    const texture = loadLogoTexture(options);
 
     logo.material.map = texture;
     logo.material.userData.texture = texture;
-    logo.material.userData.variant = variant;
     logo.material.needsUpdate = true;
 
-    const badge = keychain.getObjectByName("ResinBadgeGroup");
-    if (badge?.userData) badge.userData.logoVariant = variant;
-
-    keychain.userData.options = {
-        ...keychain.userData.options,
-        logoVariant: variant,
-    };
+    keychain.userData.logoVariant = variant;
+    keychain.userData.updatedAt = new Date().toISOString();
 }
 
-export function setResinBadgeVisibility(keychain, visible = true) {
-    const badge = keychain?.getObjectByName("ResinBadgeGroup");
-    if (badge) badge.visible = Boolean(visible);
-}
-
-export function setResinRingVisibility(keychain, visible = true) {
-    const ring = keychain?.getObjectByName("ResinRingGroup");
-    if (ring) ring.visible = Boolean(visible);
-}
-
-export function setResinChainVisibility(keychain, visible = true) {
-    const chain = keychain?.getObjectByName("ResinMiniChain");
-    if (chain) chain.visible = Boolean(visible);
-}
-
-export function setResinGlitterVisibility(keychain, visible = true) {
-    const glitter = keychain?.getObjectByName("ResinGlitterGroup");
-    if (glitter) glitter.visible = Boolean(visible);
-}
-
-export function setResinEngravingVisibility(keychain, visible = true) {
-    const engraving = keychain?.getObjectByName("ResinEngraving");
-    if (engraving) engraving.visible = Boolean(visible);
-}
-
-export function updateResinBodyColor(keychain, color = "#f2eee7") {
+export function updateResinBodyColor(keychain, color = "#fff7e8") {
     if (!keychain) return;
 
-    const body = keychain.getObjectByName("ResinBody");
-    const glow = keychain.getObjectByName("ResinInnerGlow");
-    const accent = keychain.getObjectByName("ResinAccentInclusion");
+    const body = keychain.getObjectByName("ResinKeychainBody");
+    const glow = keychain.getObjectByName("ResinKeychainInnerGlow");
 
     if (body?.material?.color) {
         body.material.color.set(color);
@@ -709,81 +1126,148 @@ export function updateResinBodyColor(keychain, color = "#f2eee7") {
     }
 
     if (glow?.material?.color) {
-        glow.material.color.set(new THREE.Color(color).offsetHSL(0, 0, 0.1));
+        glow.material.color.set(new THREE.Color(color).offsetHSL(0, 0, 0.08));
         glow.material.needsUpdate = true;
     }
 
-    if (accent?.material?.color) {
-        accent.material.color.set(new THREE.Color(color).offsetHSL(0.03, 0.12, 0.06));
-        accent.material.needsUpdate = true;
-    }
-
-    keychain.userData.options = {
-        ...keychain.userData.options,
-        bodyColor: color,
-    };
+    keychain.userData.bodyColor = color;
+    keychain.userData.updatedAt = new Date().toISOString();
 }
 
 export function updateResinEngraving(keychain, nextOptions = {}) {
-    const engraving = keychain?.getObjectByName("ResinEngraving");
+    const engraving = keychain?.getObjectByName("ResinKeychainEngraving");
     if (!engraving?.material) return;
 
-    const updatedOptions = {
-        ...(keychain.userData?.options ?? DEFAULT_RESIN_OPTIONS),
+    const options = normalizeOptions({
+        ...keychain.userData,
         ...nextOptions,
-    };
+    });
 
-    if (engraving.material.map) engraving.material.map.dispose();
+    disposeTexture(engraving.material.map);
 
-    engraving.material.map = createEngravingTexture(updatedOptions);
+    engraving.material.map = createEngravingTexture(options);
     engraving.material.needsUpdate = true;
 
-    keychain.userData.options = updatedOptions;
+    keychain.userData.labelText = options.labelText;
+    keychain.userData.labelSubtitle = options.labelSubtitle;
+    keychain.userData.labelFooter = options.labelFooter;
+    keychain.userData.updatedAt = new Date().toISOString();
+}
+
+export function setResinBadgeVisibility(keychain, visible = true) {
+    const badge = keychain?.getObjectByName("ResinKeychainLogoBadge");
+    if (badge) badge.visible = Boolean(visible);
+}
+
+export function setResinRingVisibility(keychain, visible = true) {
+    const ring = keychain?.getObjectByName("ResinKeychainRing");
+    if (ring) ring.visible = Boolean(visible);
+}
+
+export function setResinChainVisibility(keychain, visible = true) {
+    const chain = keychain?.getObjectByName("ResinKeychainChain");
+    if (chain) chain.visible = Boolean(visible);
+}
+
+export function setResinGlitterVisibility(keychain, visible = true) {
+    const glitter = keychain?.getObjectByName("ResinKeychainGlitter");
+    if (glitter) glitter.visible = Boolean(visible);
+}
+
+export function setResinEngravingVisibility(keychain, visible = true) {
+    const engraving = keychain?.getObjectByName("ResinKeychainEngraving");
+    if (engraving) engraving.visible = Boolean(visible);
 }
 
 export function animateResinKeychain(keychain, elapsedTime = 0) {
     if (!keychain) return;
 
-    const highlights = keychain.getObjectByName("ResinHighlights");
-    const glitter = keychain.getObjectByName("ResinGlitterInstances");
-    const badge = keychain.getObjectByName("ResinBadgeGroup");
+    const highlights = keychain.getObjectByName("ResinKeychainHighlights");
+    const glitter = keychain.getObjectByName("ResinKeychainGlitterInstances");
+    const badge = keychain.getObjectByName("ResinKeychainLogoBadge");
+    const ring = keychain.getObjectByName("ResinKeychainRing");
 
     if (highlights) {
-        const main = highlights.getObjectByName("ResinHighlightMain");
-        const small = highlights.getObjectByName("ResinHighlightSmall");
+        const main = highlights.getObjectByName("ResinMainHighlight");
+        const small = highlights.getObjectByName("ResinSmallHighlight");
 
-        if (main?.material) main.material.opacity = 0.13 + Math.sin(elapsedTime * 1.4) * 0.035;
-        if (small?.material) small.material.opacity = 0.09 + Math.cos(elapsedTime * 1.1) * 0.025;
+        if (main?.material) {
+            main.material.opacity = 0.15 + Math.sin(elapsedTime * 1.35) * 0.035;
+        }
+
+        if (small?.material) {
+            small.material.opacity = 0.09 + Math.cos(elapsedTime * 1.1) * 0.024;
+        }
     }
 
     if (glitter) {
-        glitter.rotation.z = Math.sin(elapsedTime * 0.35) * 0.035;
-        glitter.rotation.y = Math.cos(elapsedTime * 0.28) * 0.018;
+        glitter.rotation.z = Math.sin(elapsedTime * 0.32) * 0.025;
+        glitter.rotation.y = Math.cos(elapsedTime * 0.28) * 0.012;
     }
 
     if (badge) {
-        badge.position.z = 0.04 + Math.sin(elapsedTime * 0.8) * 0.002;
+        badge.position.z = Math.sin(elapsedTime * 0.8) * 0.002;
     }
+
+    if (ring) {
+        ring.rotation.z = Math.sin(elapsedTime * 0.35) * 0.01;
+    }
+}
+
+export function updateResinKeychainAnimation(keychain, elapsedTime = 0) {
+    animateResinKeychain(keychain, elapsedTime);
 }
 
 export function getResinKeychainParts(keychain) {
     if (!keychain) return {};
 
     return {
-        body: keychain.getObjectByName("ResinBody"),
-        glow: keychain.getObjectByName("ResinInnerGlow"),
-        accent: keychain.getObjectByName("ResinAccentInclusion"),
-        cap: keychain.getObjectByName("ResinCap"),
-        badge: keychain.getObjectByName("ResinBadgeGroup"),
-        logo: keychain.getObjectByName("ResinBadgeLogo"),
-        ring: keychain.getObjectByName("ResinRingGroup"),
-        chain: keychain.getObjectByName("ResinMiniChain"),
-        glitter: keychain.getObjectByName("ResinGlitterGroup"),
-        glitterInstances: keychain.getObjectByName("ResinGlitterInstances"),
-        engraving: keychain.getObjectByName("ResinEngraving"),
-        highlights: keychain.getObjectByName("ResinHighlights"),
-        shadow: keychain.getObjectByName("ResinContactShadow"),
+        body: keychain.getObjectByName("ResinKeychainBody"),
+        innerGlow: keychain.getObjectByName("ResinKeychainInnerGlow"),
+        colorInclusion: keychain.getObjectByName("ResinKeychainColorInclusion"),
+        border: keychain.getObjectByName("ResinKeychainBorder"),
+        logoBadge: keychain.getObjectByName("ResinKeychainLogoBadge"),
+        logo: keychain.getObjectByName("ResinLogoBadgeTexture"),
+        engraving: keychain.getObjectByName("ResinKeychainEngraving"),
+        glitter: keychain.getObjectByName("ResinKeychainGlitter"),
+        glitterInstances: keychain.getObjectByName("ResinKeychainGlitterInstances"),
+        ring: keychain.getObjectByName("ResinKeychainRing"),
+        chain: keychain.getObjectByName("ResinKeychainChain"),
+        highlights: keychain.getObjectByName("ResinKeychainHighlights"),
+        glassOverlay: keychain.getObjectByName("ResinKeychainGlassOverlay"),
+        shadow: keychain.getObjectByName("ResinKeychainContactShadow"),
     };
+}
+
+function disposeTexture(texture) {
+    if (texture?.dispose) {
+        texture.dispose();
+    }
+}
+
+function disposeMaterial(material) {
+    if (!material) return;
+
+    const materials = Array.isArray(material) ? material : [material];
+
+    materials.forEach((item) => {
+        if (!item) return;
+
+        disposeTexture(item.map);
+        disposeTexture(item.normalMap);
+        disposeTexture(item.roughnessMap);
+        disposeTexture(item.metalnessMap);
+        disposeTexture(item.alphaMap);
+        disposeTexture(item.emissiveMap);
+
+        if (item.userData?.texture) {
+            disposeTexture(item.userData.texture);
+        }
+
+        if (item.dispose) {
+            item.dispose();
+        }
+    });
 }
 
 export function disposeResinKeychain(keychain) {
@@ -791,7 +1275,6 @@ export function disposeResinKeychain(keychain) {
 
     const disposedGeometries = new Set();
     const disposedMaterials = new Set();
-    const disposedTextures = new Set();
 
     keychain.traverse((object) => {
         if (object.geometry && !disposedGeometries.has(object.geometry)) {
@@ -799,20 +1282,9 @@ export function disposeResinKeychain(keychain) {
             disposedGeometries.add(object.geometry);
         }
 
-        if (object.material) {
-            const materials = Array.isArray(object.material) ? object.material : [object.material];
-
-            materials.forEach((material) => {
-                if (material.map && !disposedTextures.has(material.map)) {
-                    material.map.dispose();
-                    disposedTextures.add(material.map);
-                }
-
-                if (!disposedMaterials.has(material)) {
-                    material.dispose();
-                    disposedMaterials.add(material);
-                }
-            });
+        if (object.material && !disposedMaterials.has(object.material)) {
+            disposeMaterial(object.material);
+            disposedMaterials.add(object.material);
         }
     });
 
@@ -820,6 +1292,39 @@ export function disposeResinKeychain(keychain) {
 }
 
 export function disposeResinLogoCache() {
-    logoTextureCache.forEach((texture) => texture.dispose());
+    logoTextureCache.forEach((texture) => {
+        disposeTexture(texture);
+        disposeTexture(texture.userData?.fallback);
+    });
+
     logoTextureCache.clear();
 }
+
+export const ResinKeychain = Object.freeze({
+    version: RESIN_KEYCHAIN_VERSION,
+    shapes: RESIN_KEYCHAIN_SHAPES,
+    styles: RESIN_KEYCHAIN_STYLES,
+    orientation: RESIN_KEYCHAIN_ORIENTATION,
+
+    createResinKeychain,
+    createKeychain,
+
+    setResinKeychainTransform,
+    setResinBadgePosition,
+    setResinLogoVariant,
+
+    updateResinBodyColor,
+    updateResinEngraving,
+    animateResinKeychain,
+    updateResinKeychainAnimation,
+
+    setResinBadgeVisibility,
+    setResinRingVisibility,
+    setResinChainVisibility,
+    setResinGlitterVisibility,
+    setResinEngravingVisibility,
+
+    getResinKeychainParts,
+    disposeResinKeychain,
+    disposeResinLogoCache,
+});
