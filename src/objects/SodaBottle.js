@@ -6,181 +6,462 @@ import {
 } from "../config/beverageCatalog.js";
 
 import {
-    applyTransform,
     setGroupShadow,
     setMeshShadow,
 } from "../utils/dimensions.js";
 
-const DEFAULT_BOTTLE_OPTIONS = {
+import {
+    createBeverageLabelTexture,
+    createMaterialFromTexture,
+} from "../utils/textureFactory.js";
+
+export const SODA_BOTTLE_VERSION = "2.0.0";
+
+export const BOTTLE_ORIENTATION = Object.freeze({
+    VERTICAL: "vertical",
+    HORIZONTAL: "horizontal",
+});
+
+export const BOTTLE_RENDER_MODE = Object.freeze({
+    PLASTIC: "plastic",
+    CLEAR_WATER: "clear-water",
+    DARK_COLA: "dark-cola",
+    SPORT: "sport",
+    METALLIC_CAN: "metallic-can",
+});
+
+export const BOTTLE_SHAPES = Object.freeze({
+    CLASSIC: "classic",
+    WATER: "water",
+    SPORT: "sport",
+    SLIM: "slim",
+    CAN: "can",
+});
+
+const DEFAULT_BOTTLE_OPTIONS = Object.freeze({
     beverageType: BEVERAGE_TYPES.CUSTOM,
+    type: BEVERAGE_TYPES.CUSTOM,
+
     labelText: "KICKOFF DRINK",
     subLabel: "Custom 2026",
     footerText: "Detalle académico",
+
+    bottleShape: BOTTLE_SHAPES.CLASSIC,
+    renderMode: BOTTLE_RENDER_MODE.PLASTIC,
+    orientation: BOTTLE_ORIENTATION.VERTICAL,
+
     liquidColor: "#2f86c7",
-    liquidOpacity: 0.68,
-    bottleTint: "#f2eee7",
-    bottleOpacity: 0.52,
+    liquidOpacity: 0.66,
+    bottleTint: "#eef7ff",
+    bottleOpacity: 0.48,
     capColor: "#f4f1e8",
-    labelBackground: "#fff7e8",
-    labelTextColor: "#2b2118",
+
+    labelBackground: "#111111",
+    labelTextColor: "#fff7e8",
     labelAccent: "#c59a4a",
     secondaryAccent: "#b92d2d",
-    pattern: "custom",
-    bottleShape: "classic",
-    materialMode: "plastic-clear",
+    pattern: "premium",
+
     bubbles: true,
-    bubbleCount: 20,
-    condensation: false,
-    dropletCount: 0,
-    carbonationSpeed: 1,
-    highlightIntensity: 0.36,
+    bubbleCount: 28,
+    condensation: true,
+    dropletCount: 38,
+    carbonationSpeed: 0.55,
+
+    showBottle: true,
     showLiquid: true,
-    showBubbles: true,
-    showCondensation: true,
     showLabel: true,
     showBackLabel: true,
+    showBubbles: true,
+    showCondensation: true,
     showHighlights: true,
     showBaseRing: true,
     showShadow: true,
-};
 
-const SHAPE_PRESETS = {
-    classic: {
-        body: {
-            radiusTop: 0.25,
-            radiusBottom: 0.31,
-            height: 1.45,
-        },
-        neck: {
-            radiusTop: 0.16,
-            radiusBottom: 0.2,
-            height: 0.38,
-        },
-        cap: {
-            radius: 0.18,
-            height: 0.16,
-        },
-        label: {
-            width: 0.82,
-            height: 0.45,
-            y: 0.05,
-            z: 0.314,
-        },
-    },
+    highlightIntensity: 0.34,
+    labelTexture: null,
+    customLabelImage: null,
+});
 
-    water: {
+const SHAPE_PRESETS = Object.freeze({
+    [BOTTLE_SHAPES.CLASSIC]: Object.freeze({
+        totalHeight: 2.05,
         body: {
-            radiusTop: 0.22,
-            radiusBottom: 0.28,
-            height: 1.58,
+            radiusTop: 0.235,
+            radiusMid: 0.315,
+            radiusBottom: 0.305,
+            height: 1.42,
         },
         neck: {
             radiusTop: 0.145,
-            radiusBottom: 0.18,
+            radiusBottom: 0.19,
+            height: 0.38,
+        },
+        cap: {
+            radius: 0.172,
+            height: 0.16,
+        },
+        label: {
+            width: 0.78,
+            height: 0.43,
+            y: 0.02,
+            z: 0.318,
+        },
+        bottom: {
+            radius: 0.25,
+            height: 0.055,
+        },
+    }),
+
+    [BOTTLE_SHAPES.WATER]: Object.freeze({
+        totalHeight: 2.1,
+        body: {
+            radiusTop: 0.215,
+            radiusMid: 0.285,
+            radiusBottom: 0.275,
+            height: 1.5,
+        },
+        neck: {
+            radiusTop: 0.135,
+            radiusBottom: 0.175,
             height: 0.42,
         },
         cap: {
-            radius: 0.165,
+            radius: 0.158,
             height: 0.15,
         },
         label: {
-            width: 0.74,
-            height: 0.38,
-            y: 0.02,
-            z: 0.286,
+            width: 0.72,
+            height: 0.36,
+            y: -0.02,
+            z: 0.292,
         },
-    },
+        bottom: {
+            radius: 0.235,
+            height: 0.052,
+        },
+    }),
 
-    sport: {
+    [BOTTLE_SHAPES.SPORT]: Object.freeze({
+        totalHeight: 2.18,
         body: {
-            radiusTop: 0.24,
-            radiusBottom: 0.3,
-            height: 1.55,
+            radiusTop: 0.235,
+            radiusMid: 0.305,
+            radiusBottom: 0.29,
+            height: 1.52,
         },
         neck: {
-            radiusTop: 0.15,
-            radiusBottom: 0.2,
-            height: 0.46,
+            radiusTop: 0.145,
+            radiusBottom: 0.19,
+            height: 0.45,
         },
         cap: {
             radius: 0.18,
-            height: 0.19,
+            height: 0.2,
         },
         label: {
-            width: 0.84,
+            width: 0.82,
             height: 0.42,
-            y: 0.02,
-            z: 0.307,
+            y: -0.02,
+            z: 0.312,
         },
-    },
+        bottom: {
+            radius: 0.245,
+            height: 0.055,
+        },
+    }),
 
-    slim: {
+    [BOTTLE_SHAPES.SLIM]: Object.freeze({
+        totalHeight: 2.0,
         body: {
-            radiusTop: 0.22,
-            radiusBottom: 0.235,
-            height: 1.62,
+            radiusTop: 0.21,
+            radiusMid: 0.238,
+            radiusBottom: 0.232,
+            height: 1.55,
         },
         neck: {
-            radiusTop: 0.14,
-            radiusBottom: 0.16,
-            height: 0.28,
+            radiusTop: 0.13,
+            radiusBottom: 0.152,
+            height: 0.29,
         },
         cap: {
-            radius: 0.15,
+            radius: 0.148,
             height: 0.13,
         },
         label: {
-            width: 0.7,
-            height: 0.62,
-            y: 0.02,
-            z: 0.238,
+            width: 0.68,
+            height: 0.58,
+            y: 0.0,
+            z: 0.244,
         },
-    },
-};
+        bottom: {
+            radius: 0.205,
+            height: 0.045,
+        },
+    }),
 
-function normalizeOptions(options = {}) {
-    const catalogConfig = getBeverage(options.beverageType ?? options.type);
+    [BOTTLE_SHAPES.CAN]: Object.freeze({
+        totalHeight: 1.28,
+        body: {
+            radiusTop: 0.255,
+            radiusMid: 0.265,
+            radiusBottom: 0.255,
+            height: 1.18,
+        },
+        neck: {
+            radiusTop: 0.001,
+            radiusBottom: 0.001,
+            height: 0.001,
+        },
+        cap: {
+            radius: 0.255,
+            height: 0.04,
+        },
+        label: {
+            width: 0.78,
+            height: 0.74,
+            y: 0.02,
+            z: 0.272,
+        },
+        bottom: {
+            radius: 0.255,
+            height: 0.04,
+        },
+    }),
+});
 
-    return {
+function safeGetBeverage(type) {
+    try {
+        return getBeverage(type);
+    } catch {
+        return getBeverage(BEVERAGE_TYPES.CUSTOM);
+    }
+}
+
+function inferBottleShape(beverageType, options = {}) {
+    if (options.bottleShape) return options.bottleShape;
+
+    if (beverageType === BEVERAGE_TYPES.WATER) return BOTTLE_SHAPES.WATER;
+    if (beverageType === BEVERAGE_TYPES.MINERAL) return BOTTLE_SHAPES.WATER;
+    if (beverageType === BEVERAGE_TYPES.SPORT) return BOTTLE_SHAPES.SPORT;
+    if (beverageType === BEVERAGE_TYPES.ENERGY) return BOTTLE_SHAPES.CAN;
+
+    return BOTTLE_SHAPES.CLASSIC;
+}
+
+function inferRenderMode(beverageType, options = {}) {
+    if (options.renderMode) return options.renderMode;
+
+    if (beverageType === BEVERAGE_TYPES.COLA) return BOTTLE_RENDER_MODE.DARK_COLA;
+    if (beverageType === BEVERAGE_TYPES.WATER) return BOTTLE_RENDER_MODE.CLEAR_WATER;
+    if (beverageType === BEVERAGE_TYPES.MINERAL) return BOTTLE_RENDER_MODE.CLEAR_WATER;
+    if (beverageType === BEVERAGE_TYPES.SPORT) return BOTTLE_RENDER_MODE.SPORT;
+    if (beverageType === BEVERAGE_TYPES.ENERGY) return BOTTLE_RENDER_MODE.METALLIC_CAN;
+
+    return BOTTLE_RENDER_MODE.PLASTIC;
+}
+
+function normalizeBottleOptions(config = {}) {
+    const source = config.beverage ?? config.bottleOptions ?? config;
+    const requestedType = source.beverageType ?? source.type ?? DEFAULT_BOTTLE_OPTIONS.beverageType;
+    const catalogConfig = safeGetBeverage(requestedType);
+    const beverageType = catalogConfig.id ?? requestedType ?? BEVERAGE_TYPES.CUSTOM;
+
+    const merged = {
         ...DEFAULT_BOTTLE_OPTIONS,
         ...catalogConfig,
-        ...options,
-        beverageType: catalogConfig.id,
+        ...source,
+        beverageType,
+        type: beverageType,
+    };
+
+    return {
+        ...merged,
+        bottleShape: inferBottleShape(beverageType, merged),
+        renderMode: inferRenderMode(beverageType, merged),
+        showBubbles: merged.showBubbles !== false && Boolean(merged.bubbles),
+        showCondensation: merged.showCondensation !== false && Boolean(merged.condensation),
     };
 }
 
 function getShapePreset(options) {
-    return SHAPE_PRESETS[options.bottleShape] ?? SHAPE_PRESETS.classic;
+    return SHAPE_PRESETS[options.bottleShape] ?? SHAPE_PRESETS[BOTTLE_SHAPES.CLASSIC];
 }
 
-function createFallbackMaterial({
-    color = "#ffffff",
-    roughness = 0.5,
-    metalness = 0,
-    transparent = false,
-    opacity = 1,
-} = {}) {
-    return new THREE.MeshStandardMaterial({
+function setDisposableName(resource, name) {
+    if (resource) resource.name = name;
+    return resource;
+}
+
+function createPhysicalMaterial({
+    name,
+    color,
+    roughness = 0.18,
+    metalness = 0.02,
+    transparent = true,
+    opacity = 0.58,
+    transmission = 0.35,
+    thickness = 0.35,
+    ior = 1.46,
+    clearcoat = 0.45,
+    clearcoatRoughness = 0.12,
+    envMapIntensity = 1.2,
+    side = THREE.FrontSide,
+}) {
+    const material = new THREE.MeshPhysicalMaterial({
+        name,
         color,
         roughness,
         metalness,
         transparent,
         opacity,
+        transmission,
+        thickness,
+        ior,
+        clearcoat,
+        clearcoatRoughness,
+        envMapIntensity,
+        side,
     });
+
+    material.needsUpdate = true;
+    return material;
 }
 
-function cloneMaterial(source, fallbackOptions = {}) {
-    if (source?.clone) return source.clone();
-
-    return createFallbackMaterial(fallbackOptions);
-}
-
-function createLatheMesh({
+function createStandardMaterial({
     name,
-    points,
-    segments = 96,
-    material,
+    color,
+    roughness = 0.55,
+    metalness = 0.02,
+    transparent = false,
+    opacity = 1,
+    side = THREE.FrontSide,
 }) {
+    const material = new THREE.MeshStandardMaterial({
+        name,
+        color,
+        roughness,
+        metalness,
+        transparent,
+        opacity,
+        side,
+    });
+
+    material.needsUpdate = true;
+    return material;
+}
+
+function createBottlePlasticMaterial(materials, options) {
+    const base = materials?.sodaBottle?.clone?.();
+
+    const material = base ?? createPhysicalMaterial({
+        name: "BottlePlasticMaterial",
+        color: options.bottleTint,
+    });
+
+    material.name = "BottlePlasticMaterial";
+    material.color?.set(options.bottleTint);
+    material.transparent = true;
+    material.opacity = options.bottleOpacity;
+
+    if ("roughness" in material) material.roughness = 0.08;
+    if ("metalness" in material) material.metalness = options.renderMode === BOTTLE_RENDER_MODE.METALLIC_CAN ? 0.42 : 0.02;
+    if ("transmission" in material) material.transmission = options.renderMode === BOTTLE_RENDER_MODE.METALLIC_CAN ? 0.02 : 0.44;
+    if ("thickness" in material) material.thickness = 0.42;
+    if ("ior" in material) material.ior = 1.46;
+    if ("clearcoat" in material) material.clearcoat = 0.55;
+    if ("clearcoatRoughness" in material) material.clearcoatRoughness = 0.08;
+    if ("envMapIntensity" in material) material.envMapIntensity = 1.35;
+
+    material.needsUpdate = true;
+    return material;
+}
+
+function createLiquidMaterial(materials, options) {
+    const base = materials?.sodaBottle?.clone?.();
+
+    const material = base ?? createPhysicalMaterial({
+        name: "BottleLiquidMaterial",
+        color: options.liquidColor,
+        opacity: options.liquidOpacity,
+        transmission: 0.12,
+    });
+
+    material.name = "BottleLiquidMaterial";
+    material.color?.set(options.liquidColor);
+    material.transparent = true;
+    material.opacity = options.liquidOpacity;
+
+    if ("roughness" in material) material.roughness = 0.14;
+    if ("metalness" in material) material.metalness = 0;
+    if ("transmission" in material) material.transmission = options.renderMode === BOTTLE_RENDER_MODE.CLEAR_WATER ? 0.25 : 0.1;
+    if ("thickness" in material) material.thickness = 0.24;
+    if ("clearcoat" in material) material.clearcoat = 0.2;
+    if ("clearcoatRoughness" in material) material.clearcoatRoughness = 0.15;
+
+    material.needsUpdate = true;
+    return material;
+}
+
+function createCapMaterial(materials, options) {
+    const base = materials?.sodaCap?.clone?.();
+
+    const material = base ?? createStandardMaterial({
+        name: "BottleCapMaterial",
+        color: options.capColor,
+        roughness: 0.42,
+        metalness: 0.08,
+    });
+
+    material.name = "BottleCapMaterial";
+    material.color?.set(options.capColor);
+
+    if ("roughness" in material) material.roughness = options.renderMode === BOTTLE_RENDER_MODE.METALLIC_CAN ? 0.24 : 0.42;
+    if ("metalness" in material) material.metalness = options.renderMode === BOTTLE_RENDER_MODE.METALLIC_CAN ? 0.46 : 0.08;
+
+    material.needsUpdate = true;
+    return material;
+}
+
+function createLabelMaterial(options, textureSet) {
+    const externalTexture =
+        options.labelTexture ??
+        textureSet?.beverageLabel?.texture ??
+        null;
+
+    const texture = externalTexture ?? createBeverageLabelTexture({
+        labelText: options.labelText,
+        subLabel: options.subLabel,
+        footerText: options.footerText,
+        labelBackground: options.labelBackground,
+        labelTextColor: options.labelTextColor,
+        labelAccent: options.labelAccent,
+        secondaryAccent: options.secondaryAccent,
+        pattern: options.pattern,
+    }).texture;
+
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.needsUpdate = true;
+
+    const material = new THREE.MeshBasicMaterial({
+        name: "BottleLabelMaterial",
+        map: texture,
+        transparent: true,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+    });
+
+    material.userData = {
+        texture,
+        generatedBy: "SodaBottle",
+        labelText: options.labelText,
+        beverageType: options.beverageType,
+    };
+
+    return material;
+}
+
+function createLatheMesh({ name, points, segments = 96, material }) {
     const geometry = new THREE.LatheGeometry(points, segments);
     geometry.computeVertexNormals();
 
@@ -188,7 +469,6 @@ function createLatheMesh({
     mesh.name = name;
 
     setMeshShadow(mesh, true, true);
-
     return mesh;
 }
 
@@ -199,12 +479,15 @@ function createCylinderMesh({
     height,
     radialSegments = 64,
     material,
+    openEnded = false,
 }) {
     const geometry = new THREE.CylinderGeometry(
         radiusTop,
         radiusBottom,
         height,
         radialSegments,
+        1,
+        openEnded,
     );
 
     geometry.computeVertexNormals();
@@ -213,273 +496,202 @@ function createCylinderMesh({
     mesh.name = name;
 
     setMeshShadow(mesh, true, true);
-
     return mesh;
 }
 
-function createSphereMesh({
-    name,
-    radius,
-    widthSegments = 24,
-    heightSegments = 12,
-    material,
-}) {
-    const geometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
-
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.name = name;
-
-    setMeshShadow(mesh, true, true);
-
-    return mesh;
-}
-
-function createBottleMaterial(materials, options) {
-    const material = cloneMaterial(materials?.sodaBottle, {
-        color: options.bottleTint,
-        roughness: 0.08,
-        metalness: 0.02,
-        transparent: true,
-        opacity: options.bottleOpacity,
-    });
-
-    material.name = "BeverageBottlePlasticMaterial";
-    material.color.set(options.bottleTint);
-    material.transparent = true;
-    material.opacity = options.bottleOpacity;
-
-    if ("roughness" in material) material.roughness = 0.08;
-    if ("metalness" in material) material.metalness = options.materialMode === "metallic" ? 0.42 : 0.02;
-
-    if ("transmission" in material) material.transmission = options.materialMode === "metallic" ? 0.04 : 0.42;
-    if ("thickness" in material) material.thickness = 0.45;
-    if ("ior" in material) material.ior = 1.46;
-    if ("clearcoat" in material) material.clearcoat = 0.55;
-    if ("clearcoatRoughness" in material) material.clearcoatRoughness = 0.08;
-    if ("envMapIntensity" in material) material.envMapIntensity = 1.35;
-
-    material.needsUpdate = true;
-
-    return material;
-}
-
-function createLiquidMaterial(materials, options) {
-    const material = cloneMaterial(materials?.sodaBottle, {
-        color: options.liquidColor,
-        roughness: 0.16,
-        metalness: 0,
-        transparent: true,
-        opacity: options.liquidOpacity,
-    });
-
-    material.name = "BeverageLiquidMaterial";
-    material.color.set(options.liquidColor);
-    material.transparent = true;
-    material.opacity = options.liquidOpacity;
-
-    if ("roughness" in material) material.roughness = 0.16;
-    if ("metalness" in material) material.metalness = 0;
-    if ("transmission" in material) material.transmission = 0.12;
-    if ("thickness" in material) material.thickness = 0.24;
-    if ("clearcoat" in material) material.clearcoat = 0.18;
-    if ("clearcoatRoughness" in material) material.clearcoatRoughness = 0.14;
-
-    material.needsUpdate = true;
-
-    return material;
-}
-
-function createCapMaterial(materials, options) {
-    const material = cloneMaterial(materials?.sodaCap, {
-        color: options.capColor,
-        roughness: 0.42,
-        metalness: 0.08,
-    });
-
-    material.name = "BeverageCapMaterial";
-    material.color.set(options.capColor);
-
-    if ("roughness" in material) material.roughness = options.materialMode === "metallic" ? 0.24 : 0.42;
-    if ("metalness" in material) material.metalness = options.materialMode === "metallic" ? 0.46 : 0.08;
-
-    material.needsUpdate = true;
-
-    return material;
-}
-
-function createBottleBody(config, materials, options) {
-    const shape = getShapePreset(options);
-    const body = config?.contentLayout?.soda?.body ?? shape.body;
+function createBottleProfile(shape, options) {
+    const body = shape.body;
     const halfHeight = body.height / 2;
 
-    const pointsByShape = {
-        classic: [
-            new THREE.Vector2(body.radiusBottom * 0.78, -halfHeight),
-            new THREE.Vector2(body.radiusBottom, -halfHeight + 0.08),
-            new THREE.Vector2(body.radiusBottom * 1.04, -halfHeight + 0.25),
-            new THREE.Vector2(body.radiusBottom * 1.02, -halfHeight + body.height * 0.62),
-            new THREE.Vector2(body.radiusTop * 1.06, halfHeight - 0.22),
-            new THREE.Vector2(body.radiusTop * 0.94, halfHeight),
-        ],
+    if (options.bottleShape === BOTTLE_SHAPES.CAN) {
+        return [
+            new THREE.Vector2(body.radiusBottom * 0.96, -halfHeight),
+            new THREE.Vector2(body.radiusBottom, -halfHeight + 0.04),
+            new THREE.Vector2(body.radiusMid, -halfHeight + 0.12),
+            new THREE.Vector2(body.radiusMid, halfHeight - 0.12),
+            new THREE.Vector2(body.radiusTop, halfHeight - 0.04),
+            new THREE.Vector2(body.radiusTop * 0.96, halfHeight),
+        ];
+    }
 
-        water: [
+    if (options.bottleShape === BOTTLE_SHAPES.WATER) {
+        return [
             new THREE.Vector2(body.radiusBottom * 0.72, -halfHeight),
-            new THREE.Vector2(body.radiusBottom, -halfHeight + 0.1),
-            new THREE.Vector2(body.radiusBottom * 1.02, -halfHeight + 0.36),
-            new THREE.Vector2(body.radiusBottom * 0.94, -halfHeight + body.height * 0.66),
-            new THREE.Vector2(body.radiusTop * 1.02, halfHeight - 0.24),
-            new THREE.Vector2(body.radiusTop * 0.9, halfHeight),
-        ],
+            new THREE.Vector2(body.radiusBottom * 0.96, -halfHeight + 0.08),
+            new THREE.Vector2(body.radiusBottom, -halfHeight + 0.22),
+            new THREE.Vector2(body.radiusMid * 0.98, -halfHeight + body.height * 0.5),
+            new THREE.Vector2(body.radiusTop * 1.05, halfHeight - 0.28),
+            new THREE.Vector2(body.radiusTop * 0.92, halfHeight),
+        ];
+    }
 
-        sport: [
-            new THREE.Vector2(body.radiusBottom * 0.75, -halfHeight),
-            new THREE.Vector2(body.radiusBottom * 1.02, -halfHeight + 0.1),
-            new THREE.Vector2(body.radiusBottom * 0.94, -halfHeight + 0.42),
-            new THREE.Vector2(body.radiusBottom * 1.06, -halfHeight + body.height * 0.58),
-            new THREE.Vector2(body.radiusTop * 1.03, halfHeight - 0.25),
-            new THREE.Vector2(body.radiusTop * 0.88, halfHeight),
-        ],
-
-        slim: [
-            new THREE.Vector2(body.radiusBottom * 0.86, -halfHeight),
+    if (options.bottleShape === BOTTLE_SHAPES.SPORT) {
+        return [
+            new THREE.Vector2(body.radiusBottom * 0.74, -halfHeight),
             new THREE.Vector2(body.radiusBottom, -halfHeight + 0.08),
-            new THREE.Vector2(body.radiusBottom * 1.02, -halfHeight + 0.38),
-            new THREE.Vector2(body.radiusTop * 1.02, halfHeight - 0.16),
-            new THREE.Vector2(body.radiusTop * 0.94, halfHeight),
-        ],
-    };
+            new THREE.Vector2(body.radiusMid * 0.92, -halfHeight + 0.32),
+            new THREE.Vector2(body.radiusMid * 1.04, -halfHeight + body.height * 0.56),
+            new THREE.Vector2(body.radiusTop * 1.02, halfHeight - 0.28),
+            new THREE.Vector2(body.radiusTop * 0.9, halfHeight),
+        ];
+    }
 
-    const points = pointsByShape[options.bottleShape] ?? pointsByShape.classic;
+    if (options.bottleShape === BOTTLE_SHAPES.SLIM) {
+        return [
+            new THREE.Vector2(body.radiusBottom * 0.84, -halfHeight),
+            new THREE.Vector2(body.radiusBottom, -halfHeight + 0.07),
+            new THREE.Vector2(body.radiusMid, -halfHeight + 0.28),
+            new THREE.Vector2(body.radiusTop * 1.03, halfHeight - 0.16),
+            new THREE.Vector2(body.radiusTop * 0.92, halfHeight),
+        ];
+    }
+
+    return [
+        new THREE.Vector2(body.radiusBottom * 0.78, -halfHeight),
+        new THREE.Vector2(body.radiusBottom, -halfHeight + 0.08),
+        new THREE.Vector2(body.radiusMid * 1.02, -halfHeight + 0.24),
+        new THREE.Vector2(body.radiusMid, -halfHeight + body.height * 0.58),
+        new THREE.Vector2(body.radiusTop * 1.08, halfHeight - 0.22),
+        new THREE.Vector2(body.radiusTop * 0.94, halfHeight),
+    ];
+}
+
+function createBottleBody(shape, materials, options) {
+    const points = createBottleProfile(shape, options);
 
     return createLatheMesh({
         name: "SodaBottleBody",
         points,
-        segments: 112,
-        material: createBottleMaterial(materials, options),
+        segments: 128,
+        material: createBottlePlasticMaterial(materials, options),
     });
 }
 
-function createBottleShoulder(config, materials, options) {
-    const shape = getShapePreset(options);
-    const body = config?.contentLayout?.soda?.body ?? shape.body;
-
-    const shoulder = createSphereMesh({
-        name: "SodaBottleShoulder",
-        radius: body.radiusBottom,
-        widthSegments: 56,
-        heightSegments: 18,
-        material: createBottleMaterial(materials, options),
+function createBottleBottom(shape, materials, options) {
+    const bottom = shape.bottom;
+    const mesh = createCylinderMesh({
+        name: "SodaBottleBottomRing",
+        radiusTop: bottom.radius * 0.94,
+        radiusBottom: bottom.radius,
+        height: bottom.height,
+        radialSegments: 96,
+        material: createBottlePlasticMaterial(materials, {
+            ...options,
+            bottleOpacity: Math.min(options.bottleOpacity + 0.08, 0.76),
+        }),
     });
 
-    shoulder.position.y = body.height / 2 - 0.02;
-    shoulder.scale.set(1, options.bottleShape === "slim" ? 0.22 : 0.34, 1);
-
-    return shoulder;
+    mesh.position.y = -shape.body.height / 2 - bottom.height * 0.15;
+    return mesh;
 }
 
-function createBottleGripGrooves(config, materials, options) {
-    const group = new THREE.Group();
-    group.name = "SodaBottleGripGrooves";
-
-    if (!["water", "sport"].includes(options.bottleShape)) {
-        return group;
+function createBottleNeck(shape, materials, options) {
+    if (options.bottleShape === BOTTLE_SHAPES.CAN) {
+        return new THREE.Group();
     }
 
-    const shape = getShapePreset(options);
-    const body = config?.contentLayout?.soda?.body ?? shape.body;
+    const neck = shape.neck;
 
-    const material = createBottleMaterial(materials, {
-        ...options,
-        bottleOpacity: Math.max(options.bottleOpacity - 0.12, 0.2),
-    });
-
-    const grooveCount = options.bottleShape === "sport" ? 5 : 4;
-
-    for (let index = 0; index < grooveCount; index += 1) {
-        const groove = new THREE.Mesh(
-            new THREE.TorusGeometry(body.radiusBottom * 0.98, 0.008, 8, 72),
-            material,
-        );
-
-        groove.name = `BottleGripGroove_${index + 1}`;
-        groove.rotation.x = Math.PI / 2;
-        groove.position.y = -body.height * 0.24 + index * 0.16;
-
-        setMeshShadow(groove, true, true);
-        group.add(groove);
-    }
-
-    return group;
-}
-
-function createBottleNeck(config, materials, options) {
-    const shape = getShapePreset(options);
-    const body = config?.contentLayout?.soda?.body ?? shape.body;
-    const neck = config?.contentLayout?.soda?.neck ?? shape.neck;
-
-    const neckMesh = createCylinderMesh({
+    const mesh = createCylinderMesh({
         name: "SodaBottleNeck",
         radiusTop: neck.radiusTop,
         radiusBottom: neck.radiusBottom,
         height: neck.height,
-        radialSegments: 72,
-        material: createBottleMaterial(materials, options),
+        radialSegments: 96,
+        material: createBottlePlasticMaterial(materials, options),
     });
 
-    neckMesh.position.y = body.height / 2 + neck.height / 2 - 0.02;
-
-    return neckMesh;
+    mesh.position.y = shape.body.height / 2 + neck.height / 2 - 0.015;
+    return mesh;
 }
 
-function createBottleCap(config, materials, options) {
-    const shape = getShapePreset(options);
-    const body = config?.contentLayout?.soda?.body ?? shape.body;
-    const neck = config?.contentLayout?.soda?.neck ?? shape.neck;
-    const capData = shape.cap;
+function createBottleCap(shape, materials, options) {
+    const cap = shape.cap;
 
-    const cap = createCylinderMesh({
+    const mesh = createCylinderMesh({
         name: "SodaBottleCap",
-        radiusTop: capData.radius,
-        radiusBottom: capData.radius,
-        height: capData.height,
-        radialSegments: 72,
+        radiusTop: cap.radius,
+        radiusBottom: cap.radius,
+        height: cap.height,
+        radialSegments: 96,
         material: createCapMaterial(materials, options),
     });
 
-    cap.position.y = body.height / 2 + neck.height + capData.height * 0.32;
+    if (options.bottleShape === BOTTLE_SHAPES.CAN) {
+        mesh.position.y = shape.body.height / 2 + cap.height / 2 - 0.01;
+        return mesh;
+    }
 
-    return cap;
+    mesh.position.y = shape.body.height / 2 + shape.neck.height + cap.height * 0.32;
+    return mesh;
 }
 
-function createCapRidges(config, materials, options) {
+function createCanTopDetail(shape, materials, options) {
+    const group = new THREE.Group();
+    group.name = "CanTopDetail";
+
+    if (options.bottleShape !== BOTTLE_SHAPES.CAN) {
+        return group;
+    }
+
+    const topY = shape.body.height / 2 + 0.035;
+    const material = createStandardMaterial({
+        name: "CanPullTabMaterial",
+        color: "#d9d3c4",
+        roughness: 0.26,
+        metalness: 0.55,
+    });
+
+    const tab = new THREE.Mesh(
+        new THREE.TorusGeometry(0.07, 0.012, 10, 36),
+        material,
+    );
+    tab.name = "CanPullTab";
+    tab.position.set(0.04, topY, 0.02);
+    tab.rotation.x = Math.PI / 2;
+    tab.scale.set(1.35, 0.72, 1);
+
+    const groove = new THREE.Mesh(
+        new THREE.TorusGeometry(shape.cap.radius * 0.72, 0.006, 8, 80),
+        material.clone(),
+    );
+    groove.name = "CanTopGroove";
+    groove.position.y = topY - 0.004;
+    groove.rotation.x = Math.PI / 2;
+
+    group.add(groove, tab);
+    return group;
+}
+
+function createCapRidges(shape, materials, options) {
     const group = new THREE.Group();
     group.name = "SodaBottleCapRidges";
 
-    const shape = getShapePreset(options);
-    const body = config?.contentLayout?.soda?.body ?? shape.body;
-    const neck = config?.contentLayout?.soda?.neck ?? shape.neck;
-    const capData = shape.cap;
+    if (options.bottleShape === BOTTLE_SHAPES.CAN) {
+        return group;
+    }
 
-    const ridgeCount = options.bottleShape === "sport" ? 24 : 18;
+    const cap = shape.cap;
+    const y = shape.body.height / 2 + shape.neck.height + cap.height * 0.32;
+    const ridgeCount = options.bottleShape === BOTTLE_SHAPES.SPORT ? 28 : 22;
     const material = createCapMaterial(materials, options);
-    const y = body.height / 2 + neck.height + capData.height * 0.32;
 
     for (let index = 0; index < ridgeCount; index += 1) {
         const angle = (index / ridgeCount) * Math.PI * 2;
 
         const ridge = createCylinderMesh({
             name: `CapRidge_${index + 1}`,
-            radiusTop: 0.008,
-            radiusBottom: 0.009,
-            height: capData.height * 0.9,
+            radiusTop: 0.006,
+            radiusBottom: 0.007,
+            height: cap.height * 0.88,
             radialSegments: 8,
             material,
         });
 
         ridge.position.set(
-            Math.cos(angle) * (capData.radius + 0.006),
+            Math.cos(angle) * (cap.radius + 0.008),
             y,
-            Math.sin(angle) * (capData.radius + 0.006),
+            Math.sin(angle) * (cap.radius + 0.008),
         );
 
         ridge.rotation.z = Math.PI / 2;
@@ -491,77 +703,106 @@ function createCapRidges(config, materials, options) {
     return group;
 }
 
-function createSportNozzle(config, materials, options) {
+function createSportNozzle(shape, materials, options) {
     const group = new THREE.Group();
     group.name = "SodaBottleSportNozzle";
 
-    if (options.bottleShape !== "sport") {
+    if (options.bottleShape !== BOTTLE_SHAPES.SPORT) {
         return group;
     }
-
-    const shape = getShapePreset(options);
-    const body = config?.contentLayout?.soda?.body ?? shape.body;
-    const neck = config?.contentLayout?.soda?.neck ?? shape.neck;
-    const capData = shape.cap;
 
     const material = createCapMaterial(materials, {
         ...options,
         capColor: "#f7f7f7",
     });
 
-    const y = body.height / 2 + neck.height + capData.height + 0.03;
+    const baseY = shape.body.height / 2 + shape.neck.height + shape.cap.height + 0.03;
 
     const nozzle = createCylinderMesh({
         name: "SportNozzleBody",
-        radiusTop: 0.09,
-        radiusBottom: 0.12,
+        radiusTop: 0.088,
+        radiusBottom: 0.118,
         height: 0.12,
-        radialSegments: 48,
+        radialSegments: 56,
         material,
     });
-
-    nozzle.position.y = y;
+    nozzle.position.y = baseY;
 
     const top = createCylinderMesh({
         name: "SportNozzleTop",
-        radiusTop: 0.055,
-        radiusBottom: 0.075,
+        radiusTop: 0.052,
+        radiusBottom: 0.074,
         height: 0.08,
-        radialSegments: 48,
-        material,
+        radialSegments: 56,
+        material: material.clone(),
     });
-
-    top.position.y = y + 0.09;
+    top.position.y = baseY + 0.09;
 
     group.add(nozzle, top);
+    return group;
+}
+
+function createGripGrooves(shape, materials, options) {
+    const group = new THREE.Group();
+    group.name = "SodaBottleGripGrooves";
+
+    if (![BOTTLE_SHAPES.WATER, BOTTLE_SHAPES.SPORT].includes(options.bottleShape)) {
+        return group;
+    }
+
+    const material = createBottlePlasticMaterial(materials, {
+        ...options,
+        bottleOpacity: Math.max(options.bottleOpacity - 0.12, 0.2),
+    });
+
+    const grooveCount = options.bottleShape === BOTTLE_SHAPES.SPORT ? 5 : 4;
+
+    for (let index = 0; index < grooveCount; index += 1) {
+        const groove = new THREE.Mesh(
+            new THREE.TorusGeometry(shape.body.radiusMid * 0.98, 0.008, 8, 96),
+            material,
+        );
+
+        groove.name = `BottleGripGroove_${index + 1}`;
+        groove.rotation.x = Math.PI / 2;
+        groove.position.y = -shape.body.height * 0.24 + index * 0.16;
+
+        setMeshShadow(groove, true, true);
+        group.add(groove);
+    }
 
     return group;
 }
 
-function createBottleLiquid(config, materials, options) {
-    const shape = getShapePreset(options);
-    const body = config?.contentLayout?.soda?.body ?? shape.body;
+function createBottleLiquid(shape, materials, options) {
+    const group = new THREE.Group();
+    group.name = "SodaBottleLiquidGroup";
+    group.visible = Boolean(options.showLiquid && options.bottleShape !== BOTTLE_SHAPES.CAN);
+
+    if (!group.visible) {
+        return group;
+    }
 
     const liquidHeight =
-        options.materialMode === "metallic"
-            ? body.height * 0.76
-            : body.height * 0.68;
+        options.renderMode === BOTTLE_RENDER_MODE.CLEAR_WATER
+            ? shape.body.height * 0.72
+            : shape.body.height * 0.68;
 
     const liquid = createCylinderMesh({
         name: "SodaBottleLiquid",
-        radiusTop: body.radiusTop * 0.88,
-        radiusBottom: body.radiusBottom * 0.86,
+        radiusTop: shape.body.radiusTop * 0.86,
+        radiusBottom: shape.body.radiusBottom * 0.86,
         height: liquidHeight,
-        radialSegments: 72,
+        radialSegments: 96,
         material: createLiquidMaterial(materials, options),
     });
 
-    liquid.position.y = -body.height * 0.08;
+    liquid.position.y = -shape.body.height * 0.08;
     liquid.renderOrder = 1;
 
     const topSurface = new THREE.Mesh(
-        new THREE.CircleGeometry(body.radiusTop * 0.88, 72),
-        liquid.material,
+        new THREE.CircleGeometry(shape.body.radiusTop * 0.86, 96),
+        liquid.material.clone(),
     );
 
     topSurface.name = "SodaLiquidTopSurface";
@@ -569,254 +810,62 @@ function createBottleLiquid(config, materials, options) {
     topSurface.position.y = liquid.position.y + liquidHeight / 2;
     topSurface.renderOrder = 2;
 
-    setMeshShadow(topSurface, false, false);
-
-    const group = new THREE.Group();
-    group.name = "SodaLiquidGroup";
-    group.visible = options.showLiquid;
-
     group.add(liquid, topSurface);
-
     return group;
 }
 
-function drawRoundedRect(ctx, x, y, width, height, radius) {
-    const safeRadius = Math.min(radius, width / 2, height / 2);
-
-    ctx.beginPath();
-    ctx.moveTo(x + safeRadius, y);
-    ctx.lineTo(x + width - safeRadius, y);
-    ctx.quadraticCurveTo(x + width, y, x + width, y + safeRadius);
-    ctx.lineTo(x + width, y + height - safeRadius);
-    ctx.quadraticCurveTo(x + width, y + height, x + width - safeRadius, y + height);
-    ctx.lineTo(x + safeRadius, y + height);
-    ctx.quadraticCurveTo(x, y + height, x, y + height - safeRadius);
-    ctx.lineTo(x, y + safeRadius);
-    ctx.quadraticCurveTo(x, y, x + safeRadius, y);
-    ctx.closePath();
-}
-
-function drawLabelPattern(ctx, canvas, options) {
-    const width = canvas.width;
-    const height = canvas.height;
-
-    if (options.pattern === "premium") {
-        ctx.strokeStyle = "rgba(214, 180, 92, 0.32)";
-        ctx.lineWidth = 6;
-
-        for (let index = -8; index < 18; index += 1) {
-            ctx.beginPath();
-            ctx.moveTo(index * 90, height);
-            ctx.lineTo(index * 90 + 320, 0);
-            ctx.stroke();
-        }
-
-        return;
-    }
-
-    if (options.pattern === "citrus") {
-        ctx.fillStyle = "rgba(244, 123, 32, 0.16)";
-
-        for (let index = 0; index < 12; index += 1) {
-            const x = 80 + index * 90;
-            const y = 90 + Math.sin(index) * 40;
-
-            ctx.beginPath();
-            ctx.arc(x, y, 38, 0, Math.PI * 2);
-            ctx.fill();
-        }
-
-        return;
-    }
-
-    if (options.pattern === "fresh") {
-        ctx.strokeStyle = "rgba(47, 125, 85, 0.24)";
-        ctx.lineWidth = 8;
-
-        for (let index = 0; index < 9; index += 1) {
-            ctx.beginPath();
-            ctx.arc(120 + index * 120, height / 2, 70, 0, Math.PI);
-            ctx.stroke();
-        }
-
-        return;
-    }
-
-    if (options.pattern === "water" || options.pattern === "mineral") {
-        ctx.strokeStyle = "rgba(47, 134, 199, 0.22)";
-        ctx.lineWidth = 6;
-
-        for (let index = 0; index < 7; index += 1) {
-            ctx.beginPath();
-            ctx.moveTo(0, 120 + index * 45);
-            ctx.bezierCurveTo(
-                width * 0.25,
-                80 + index * 55,
-                width * 0.75,
-                160 + index * 35,
-                width,
-                110 + index * 45,
-            );
-            ctx.stroke();
-        }
-
-        return;
-    }
-
-    if (options.pattern === "sport") {
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
-        ctx.lineWidth = 7;
-
-        for (let index = -2; index < 10; index += 1) {
-            ctx.beginPath();
-            ctx.moveTo(index * 150, height);
-            ctx.lineTo(index * 150 + 260, 0);
-            ctx.stroke();
-        }
-
-        return;
-    }
-
-    if (options.pattern === "energy") {
-        ctx.strokeStyle = "rgba(226, 255, 63, 0.34)";
-        ctx.lineWidth = 8;
-
-        for (let index = 0; index < 7; index += 1) {
-            const startX = 80 + index * 130;
-
-            ctx.beginPath();
-            ctx.moveTo(startX, 80);
-            ctx.lineTo(startX + 50, 210);
-            ctx.lineTo(startX + 10, 210);
-            ctx.lineTo(startX + 80, 410);
-            ctx.stroke();
-        }
-    }
-}
-
-function createLabelTexture(options) {
-    const canvas = document.createElement("canvas");
-    canvas.width = 1400;
-    canvas.height = 620;
-
-    const ctx = canvas.getContext("2d");
-
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, options.labelBackground);
-    gradient.addColorStop(0.58, options.labelBackground);
-    gradient.addColorStop(1, options.labelAccent);
-
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    drawLabelPattern(ctx, canvas, options);
-
-    ctx.fillStyle = options.secondaryAccent;
-    ctx.fillRect(0, 0, canvas.width, 54);
-
-    ctx.fillStyle = options.labelAccent;
-    ctx.fillRect(0, 54, canvas.width, 54);
-
-    ctx.strokeStyle = options.labelAccent;
-    ctx.lineWidth = 14;
-    drawRoundedRect(ctx, 54, 150, canvas.width - 108, 330, 42);
-    ctx.stroke();
-
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.38)";
-    ctx.lineWidth = 6;
-    drawRoundedRect(ctx, 82, 178, canvas.width - 164, 274, 30);
-    ctx.stroke();
-
-    ctx.fillStyle = options.labelTextColor;
-    ctx.font = "bold 112px Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(options.labelText, canvas.width / 2, 285);
-
-    ctx.font = "bold 48px Arial";
-    ctx.fillText(options.subLabel, canvas.width / 2, 382);
-
-    ctx.fillStyle = options.labelAccent;
-    ctx.font = "bold 32px Arial";
-    ctx.fillText(options.footerText, canvas.width / 2, 540);
-
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.colorSpace = THREE.SRGBColorSpace;
-    texture.anisotropy = 8;
-    texture.needsUpdate = true;
-
-    return texture;
-}
-
-function createBottleLabel(config, options) {
-    const shape = getShapePreset(options);
+function createBottleLabel(shape, options, textureSet) {
     const labelData = shape.label;
-
-    const texture = createLabelTexture(options);
-
-    const material = new THREE.MeshBasicMaterial({
-        name: "SodaBottleLabelMaterial",
-        map: texture,
-        transparent: true,
-        side: THREE.DoubleSide,
-    });
-
-    material.userData = {
-        texture,
-        labelText: options.labelText,
-        subLabel: options.subLabel,
-        beverageType: options.beverageType,
-    };
+    const material = createLabelMaterial(options, textureSet);
 
     const label = new THREE.Mesh(
-        new THREE.PlaneGeometry(labelData.width, labelData.height),
+        new THREE.PlaneGeometry(labelData.width, labelData.height, 8, 1),
         material,
     );
 
     label.name = "SodaBottleLabel";
     label.position.set(0, labelData.y, labelData.z);
     label.renderOrder = 8;
+    label.visible = Boolean(options.showLabel);
 
     return label;
 }
 
-function createBottleBackLabel(config, options) {
-    const shape = getShapePreset(options);
+function createBottleBackLabel(shape, options, textureSet) {
     const labelData = shape.label;
+    const material = createLabelMaterial(
+        {
+            ...options,
+            labelText: options.shortLabel?.toUpperCase?.() ?? "KICK",
+            subLabel: "KickOff Box",
+            footerText: "Personalizado",
+        },
+        textureSet,
+    );
 
-    const texture = createLabelTexture({
-        ...options,
-        labelText: options.shortLabel?.toUpperCase?.() ?? "KICK",
-        subLabel: "KickOff Box",
-        footerText: "Personalizado",
-    });
-
-    const material = new THREE.MeshBasicMaterial({
-        name: "SodaBottleBackLabelMaterial",
-        map: texture,
-        transparent: true,
-        opacity: 0.9,
-        side: THREE.DoubleSide,
-    });
+    material.opacity = 0.85;
+    material.transparent = true;
 
     const label = new THREE.Mesh(
-        new THREE.PlaneGeometry(labelData.width * 0.86, labelData.height * 0.78),
+        new THREE.PlaneGeometry(labelData.width * 0.82, labelData.height * 0.72, 8, 1),
         material,
     );
 
     label.name = "SodaBottleBackLabel";
-    label.position.set(0, labelData.y - 0.01, -labelData.z);
+    label.position.set(0, labelData.y - 0.012, -labelData.z);
     label.rotation.y = Math.PI;
     label.renderOrder = 8;
+    label.visible = Boolean(options.showBackLabel);
 
     return label;
 }
 
-function createBottleHighlights(options) {
+function createBottleHighlights(shape, options) {
     const group = new THREE.Group();
     group.name = "SodaBottleHighlights";
+    group.visible = Boolean(options.showHighlights);
 
-    const highlightMaterial = new THREE.MeshBasicMaterial({
+    const material = new THREE.MeshBasicMaterial({
         name: "BottleHighlightMaterial",
         color: "#ffffff",
         transparent: true,
@@ -826,47 +875,54 @@ function createBottleHighlights(options) {
         depthWrite: false,
     });
 
-    const mainHighlight = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.055, 1.22),
-        highlightMaterial,
+    const height = options.bottleShape === BOTTLE_SHAPES.CAN
+        ? shape.body.height * 0.72
+        : shape.body.height * 0.86;
+
+    const main = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.052, height),
+        material,
     );
 
-    mainHighlight.name = "BottleMainHighlight";
-    mainHighlight.position.set(-0.18, 0.04, 0.318);
-    mainHighlight.rotation.z = -0.05;
-    mainHighlight.renderOrder = 9;
+    main.name = "BottleMainHighlight";
+    main.position.set(-shape.body.radiusMid * 0.58, 0.03, shape.body.radiusMid + 0.012);
+    main.rotation.z = -0.05;
+    main.renderOrder = 9;
 
-    const sideHighlight = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.034, 0.52),
-        highlightMaterial.clone(),
+    const side = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.032, height * 0.42),
+        material.clone(),
     );
 
-    sideHighlight.name = "BottleSideHighlight";
-    sideHighlight.material.opacity = options.highlightIntensity * 0.62;
-    sideHighlight.position.set(0.16, 0.38, 0.32);
-    sideHighlight.rotation.z = 0.08;
-    sideHighlight.renderOrder = 9;
+    side.name = "BottleSideHighlight";
+    side.material.opacity = options.highlightIntensity * 0.58;
+    side.position.set(shape.body.radiusMid * 0.52, shape.body.height * 0.14, shape.body.radiusMid + 0.014);
+    side.rotation.z = 0.08;
+    side.renderOrder = 9;
 
-    group.add(mainHighlight, sideHighlight);
-
+    group.add(main, side);
     return group;
 }
 
-function createBottleBubbles(config, materials, options) {
+function createBubbles(shape, options) {
     const group = new THREE.Group();
     group.name = "SodaBottleBubbles";
-    group.visible = Boolean(options.bubbles && options.showBubbles);
+    group.visible = Boolean(options.showBubbles && options.bubbles && options.bottleShape !== BOTTLE_SHAPES.CAN);
 
-    const count = options.bubbleCount ?? 0;
+    if (!group.visible) {
+        return group;
+    }
+
+    const count = Math.max(0, Number(options.bubbleCount) || 0);
 
     if (!count) return group;
 
-    const geometry = new THREE.SphereGeometry(0.035, 12, 8);
+    const geometry = new THREE.SphereGeometry(0.026, 10, 6);
     const material = new THREE.MeshBasicMaterial({
         name: "BottleBubbleMaterial",
         color: "#ffffff",
         transparent: true,
-        opacity: options.beverageType === BEVERAGE_TYPES.COLA ? 0.28 : 0.42,
+        opacity: options.beverageType === BEVERAGE_TYPES.COLA ? 0.28 : 0.44,
         depthWrite: false,
     });
 
@@ -878,8 +934,8 @@ function createBottleBubbles(config, materials, options) {
 
     for (let index = 0; index < count; index += 1) {
         const angle = index * 2.399963;
-        const radius = 0.04 + (index % 5) * 0.025;
-        const y = -0.55 + (index / count) * 1.04;
+        const radius = 0.035 + (index % 6) * 0.024;
+        const y = -shape.body.height * 0.38 + (index / count) * shape.body.height * 0.76;
 
         const position = new THREE.Vector3(
             Math.cos(angle) * radius,
@@ -887,14 +943,13 @@ function createBottleBubbles(config, materials, options) {
             Math.sin(angle) * radius,
         );
 
-        const scale = 0.45 + (index % 4) * 0.16;
+        const scale = 0.42 + (index % 4) * 0.15;
 
         dummy.position.copy(position);
         dummy.scale.setScalar(scale);
         dummy.updateMatrix();
 
         instanced.setMatrixAt(index, dummy.matrix);
-
         data.push({
             base: position,
             scale,
@@ -907,364 +962,252 @@ function createBottleBubbles(config, materials, options) {
     instanced.userData.speed = options.carbonationSpeed;
 
     group.add(instanced);
-
     return group;
 }
 
-function createCondensationDrops(config, materials, options) {
+function createCondensation(shape, options) {
     const group = new THREE.Group();
     group.name = "SodaBottleCondensation";
-    group.visible = Boolean(options.condensation && options.showCondensation);
+    group.visible = Boolean(options.showCondensation && options.condensation);
 
-    const count = options.dropletCount ?? 0;
+    if (!group.visible) return group;
 
+    const count = Math.max(0, Number(options.dropletCount) || 0);
     if (!count) return group;
 
-    const geometry = new THREE.SphereGeometry(0.018, 10, 6);
+    const geometry = new THREE.SphereGeometry(0.015, 8, 6);
     const material = new THREE.MeshBasicMaterial({
         name: "BottleCondensationMaterial",
         color: "#ffffff",
         transparent: true,
-        opacity: 0.34,
+        opacity: 0.42,
         depthWrite: false,
     });
 
-    const drops = new THREE.InstancedMesh(geometry, material, count);
-    drops.name = "CondensationDropInstances";
+    const instanced = new THREE.InstancedMesh(geometry, material, count);
+    instanced.name = "BottleCondensationInstances";
 
     const dummy = new THREE.Object3D();
+    const data = [];
 
     for (let index = 0; index < count; index += 1) {
-        const angle = index * 2.17;
-        const y = -0.5 + ((index * 37) % 100) / 100;
-        const radius = 0.275 + Math.sin(index) * 0.018;
+        const angle = index * 2.131;
+        const y = -shape.body.height * 0.42 + ((index * 37) % count) / count * shape.body.height * 0.84;
+        const radius = shape.body.radiusMid + 0.018;
+        const scale = 0.45 + (index % 5) * 0.12;
 
-        dummy.position.set(
+        const position = new THREE.Vector3(
             Math.cos(angle) * radius,
             y,
             Math.sin(angle) * radius,
         );
 
-        const scale = 0.45 + ((index * 13) % 6) * 0.08;
-        dummy.scale.set(scale * 0.72, scale, scale * 0.72);
-
+        dummy.position.copy(position);
+        dummy.scale.set(0.85 * scale, 1.25 * scale, 0.85 * scale);
         dummy.updateMatrix();
-        drops.setMatrixAt(index, dummy.matrix);
+
+        instanced.setMatrixAt(index, dummy.matrix);
+        data.push({
+            base: position,
+            scale,
+            phase: index * 0.37,
+        });
     }
 
-    drops.instanceMatrix.needsUpdate = true;
+    instanced.instanceMatrix.needsUpdate = true;
+    instanced.userData.droplets = data;
 
-    group.add(drops);
+    group.add(instanced);
+    return group;
+}
+
+function createBaseRing(shape, materials, options) {
+    const group = new THREE.Group();
+    group.name = "SodaBottleBaseRing";
+    group.visible = Boolean(options.showBaseRing);
+
+    if (!group.visible || options.bottleShape === BOTTLE_SHAPES.CAN) {
+        return group;
+    }
+
+    const material = createBottlePlasticMaterial(materials, {
+        ...options,
+        bottleOpacity: Math.min(options.bottleOpacity + 0.14, 0.82),
+    });
+
+    const ring = new THREE.Mesh(
+        new THREE.TorusGeometry(shape.body.radiusBottom * 0.82, 0.014, 10, 96),
+        material,
+    );
+
+    ring.name = "BottleBottomSupportRing";
+    ring.rotation.x = Math.PI / 2;
+    ring.position.y = -shape.body.height / 2 + 0.015;
+
+    group.add(ring);
+    return group;
+}
+
+function createBottleShadow(shape, options) {
+    const group = new THREE.Group();
+    group.name = "SodaBottleSoftShadow";
+    group.visible = Boolean(options.showShadow);
+
+    const geometry = new THREE.CircleGeometry(0.72, 64);
+    const material = new THREE.MeshBasicMaterial({
+        name: "BottleSoftShadowMaterial",
+        color: "#000000",
+        transparent: true,
+        opacity: 0.16,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+    });
+
+    const shadow = new THREE.Mesh(geometry, material);
+    shadow.name = "BottleContactShadow";
+    shadow.rotation.x = -Math.PI / 2;
+    shadow.position.y = -shape.body.height / 2 - 0.04;
+    shadow.scale.set(0.75, 1.85, 1);
+
+    group.add(shadow);
+    return group;
+}
+
+function createAxisMarker(shape) {
+    const group = new THREE.Group();
+    group.name = "SodaBottleInternalAxis";
+    group.visible = false;
+
+    const axis = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.006, 0.006, shape.totalHeight, 8),
+        new THREE.MeshBasicMaterial({
+            color: "#ff00ff",
+            transparent: true,
+            opacity: 0.35,
+        }),
+    );
+
+    group.add(axis);
+    return group;
+}
+
+function applyDefaultSceneScale(group, options) {
+    const scale = options.sceneScale ?? 1;
+
+    group.scale.multiplyScalar(scale);
+
+    if (options.orientation === BOTTLE_ORIENTATION.HORIZONTAL) {
+        group.rotation.z = Math.PI / 2;
+    }
 
     return group;
 }
 
-function createBottleBaseRing(materials, options) {
-    const shape = getShapePreset(options);
-    const body = shape.body;
-
-    const ringMaterial =
-        materials?.gold ??
-        createFallbackMaterial({
-            color: options.labelAccent,
-            roughness: 0.32,
-            metalness: 0.35,
-        });
-
-    const ring = new THREE.Mesh(
-        new THREE.TorusGeometry(body.radiusBottom * 0.94, 0.022, 12, 72),
-        ringMaterial,
-    );
-
-    ring.name = "SodaBottleBaseRing";
-    ring.rotation.x = Math.PI / 2;
-    ring.position.y = -body.height / 2 - 0.004;
-    ring.visible = options.showBaseRing;
-
-    setMeshShadow(ring, true, true);
-
-    return ring;
+function createBottleMetadata(options, shape) {
+    return {
+        objectType: "SodaBottle",
+        version: SODA_BOTTLE_VERSION,
+        beverageType: options.beverageType,
+        bottleShape: options.bottleShape,
+        renderMode: options.renderMode,
+        orientation: options.orientation,
+        dimensions: {
+            totalHeight: shape.totalHeight,
+            maxRadius: shape.body.radiusMid,
+            approximateLength: shape.totalHeight,
+            approximateDiameter: shape.body.radiusMid * 2,
+        },
+        editable: true,
+        createdAt: new Date().toISOString(),
+    };
 }
 
-function createBottleContactShadow(materials, options) {
+export function createSodaBottle(config = {}, materials = {}, textureSet = {}) {
+    const options = normalizeBottleOptions(config);
     const shape = getShapePreset(options);
 
-    const shadowMaterial =
-        materials?.shadowSoft ??
-        new THREE.MeshBasicMaterial({
-            color: "#000000",
-            transparent: true,
-            opacity: 0.24,
-            side: THREE.DoubleSide,
-        });
-
-    const shadow = new THREE.Mesh(
-        new THREE.CircleGeometry(shape.body.radiusBottom * 1.55, 56),
-        shadowMaterial,
-    );
-
-    shadow.name = "SodaBottleContactShadow";
-    shadow.rotation.x = -Math.PI / 2;
-    shadow.position.y = -shape.body.height / 2 - 0.03;
-    shadow.scale.set(1.2, 0.72, 1);
-    shadow.visible = options.showShadow;
-
-    return shadow;
-}
-
-function createBottleAssembly(config, materials, options) {
     const group = new THREE.Group();
-    group.name = "SodaBottleAssembly";
+    group.name = "SodaBottle";
+    group.visible = options.showBottle !== false;
+    group.userData = createBottleMetadata(options, shape);
 
-    const contactShadow = createBottleContactShadow(materials, options);
-    const liquid = createBottleLiquid(config, materials, options);
-    const body = createBottleBody(config, materials, options);
-    const shoulder = createBottleShoulder(config, materials, options);
-    const grooves = createBottleGripGrooves(config, materials, options);
-    const neck = createBottleNeck(config, materials, options);
-    const cap = createBottleCap(config, materials, options);
-    const capRidges = createCapRidges(config, materials, options);
-    const sportNozzle = createSportNozzle(config, materials, options);
-    const label = createBottleLabel(config, options);
-    const backLabel = createBottleBackLabel(config, options);
-    const highlights = createBottleHighlights(options);
-    const bubbles = createBottleBubbles(config, materials, options);
-    const condensation = createCondensationDrops(config, materials, options);
-    const baseRing = createBottleBaseRing(materials, options);
-
-    label.visible = options.showLabel;
-    backLabel.visible = options.showBackLabel;
-    highlights.visible = options.showHighlights;
+    const body = createBottleBody(shape, materials, options);
+    const bottom = createBottleBottom(shape, materials, options);
+    const neck = createBottleNeck(shape, materials, options);
+    const cap = createBottleCap(shape, materials, options);
+    const capRidges = createCapRidges(shape, materials, options);
+    const sportNozzle = createSportNozzle(shape, materials, options);
+    const canTop = createCanTopDetail(shape, materials, options);
+    const gripGrooves = createGripGrooves(shape, materials, options);
+    const liquid = createBottleLiquid(shape, materials, options);
+    const label = createBottleLabel(shape, options, textureSet);
+    const backLabel = createBottleBackLabel(shape, options, textureSet);
+    const highlights = createBottleHighlights(shape, options);
+    const bubbles = createBubbles(shape, options);
+    const condensation = createCondensation(shape, options);
+    const baseRing = createBaseRing(shape, materials, options);
+    const shadow = createBottleShadow(shape, options);
+    const axis = createAxisMarker(shape);
 
     group.add(
-        contactShadow,
-        liquid,
+        shadow,
         body,
-        shoulder,
-        grooves,
+        bottom,
+        liquid,
         neck,
         cap,
         capRidges,
         sportNozzle,
+        canTop,
+        gripGrooves,
         label,
         backLabel,
         highlights,
         bubbles,
         condensation,
         baseRing,
+        axis,
     );
 
-    return group;
-}
-
-function disposeObjectResources(object) {
-    const disposedGeometries = new Set();
-    const disposedMaterials = new Set();
-    const disposedTextures = new Set();
-
-    object.traverse((child) => {
-        if (child.geometry && !disposedGeometries.has(child.geometry)) {
-            child.geometry.dispose();
-            disposedGeometries.add(child.geometry);
-        }
-
-        if (child.material) {
-            const materials = Array.isArray(child.material)
-                ? child.material
-                : [child.material];
-
-            materials.forEach((material) => {
-                if (material.map && !disposedTextures.has(material.map)) {
-                    material.map.dispose();
-                    disposedTextures.add(material.map);
-                }
-
-                if (!disposedMaterials.has(material)) {
-                    material.dispose();
-                    disposedMaterials.add(material);
-                }
-            });
-        }
-    });
-}
-
-function replaceAssembly(bottleGroup, config, materials, options) {
-    const oldAssembly = bottleGroup.getObjectByName("SodaBottleAssembly");
-
-    if (oldAssembly) {
-        disposeObjectResources(oldAssembly);
-        bottleGroup.remove(oldAssembly);
-    }
-
-    const nextAssembly = createBottleAssembly(config, materials, options);
-    bottleGroup.add(nextAssembly);
-
-    bottleGroup.userData.options = options;
-    bottleGroup.userData.config = config;
-    bottleGroup.userData.materials = materials;
-}
-
-export function createSodaBottle(config, materials, options = {}) {
-    const mergedOptions = normalizeOptions({
-        labelText: config?.contentLayout?.soda?.label,
-        ...options,
-    });
-
-    const group = new THREE.Group();
-    group.name = "KickOffBoxSodaBottle";
-
-    const assembly = createBottleAssembly(config, materials, mergedOptions);
-    group.add(assembly);
-
-    const layout = config?.contentLayout?.soda ?? {};
-
-    applyTransform(group, {
-        position: layout.position ?? [0.82, 0.55, 0.42],
-        rotation: layout.rotation ?? [0, 0, Math.PI / 2],
-        scale: layout.scale ?? [0.78, 0.78, 0.78],
-    });
-
-    group.userData = {
-        type: "soda-bottle",
-        editable: true,
-        draggable: true,
-        rotatable: true,
-        scalable: true,
-        visibleInPresets: ["estandar", "premium"],
-        minScale: 0.45,
-        maxScale: 1.25,
-        description: "Bebida personalizable para acompañar el presente académico.",
-        options: mergedOptions,
-        config,
-        materials,
-    };
-
+    applyDefaultSceneScale(group, options);
     setGroupShadow(group, true, true);
 
+    group.userData.parts = {
+        body: body.name,
+        bottom: bottom.name,
+        liquid: liquid.name,
+        neck: neck.name,
+        cap: cap.name,
+        label: label.name,
+        backLabel: backLabel.name,
+        bubbles: bubbles.name,
+        condensation: condensation.name,
+    };
+
     return group;
 }
 
-export function setSodaBottleType(bottleGroup, beverageType = BEVERAGE_TYPES.CUSTOM, overrides = {}) {
-    if (!bottleGroup) return;
+export function updateSodaBottleAnimation(sodaBottle, elapsedTime = 0) {
+    if (!sodaBottle) return;
 
-    const currentOptions = bottleGroup.userData?.options ?? DEFAULT_BOTTLE_OPTIONS;
-    const config = bottleGroup.userData?.config ?? {};
-    const materials = bottleGroup.userData?.materials ?? {};
+    const bubbles = sodaBottle.getObjectByName("SodaBubbleInstances");
+    const droplets = sodaBottle.getObjectByName("BottleCondensationInstances");
+    const highlight = sodaBottle.getObjectByName("BottleMainHighlight");
 
-    const nextOptions = normalizeOptions({
-        ...currentOptions,
-        beverageType,
-        ...overrides,
-    });
-
-    replaceAssembly(bottleGroup, config, materials, nextOptions);
-}
-
-export function updateSodaBottleLabel(bottleGroup, nextLabel = {}) {
-    if (!bottleGroup) return;
-
-    const currentOptions = bottleGroup.userData?.options ?? DEFAULT_BOTTLE_OPTIONS;
-    const config = bottleGroup.userData?.config ?? {};
-    const materials = bottleGroup.userData?.materials ?? {};
-
-    const nextOptions = normalizeOptions({
-        ...currentOptions,
-        ...nextLabel,
-    });
-
-    replaceAssembly(bottleGroup, config, materials, nextOptions);
-}
-
-export function updateSodaBottleColors(bottleGroup, colors = {}) {
-    if (!bottleGroup) return;
-
-    const currentOptions = bottleGroup.userData?.options ?? DEFAULT_BOTTLE_OPTIONS;
-    const config = bottleGroup.userData?.config ?? {};
-    const materials = bottleGroup.userData?.materials ?? {};
-
-    const nextOptions = normalizeOptions({
-        ...currentOptions,
-        liquidColor: colors.liquid ?? currentOptions.liquidColor,
-        capColor: colors.cap ?? currentOptions.capColor,
-        bottleTint: colors.bottle ?? currentOptions.bottleTint,
-        labelAccent: colors.labelAccent ?? currentOptions.labelAccent,
-        labelBackground: colors.labelBackground ?? currentOptions.labelBackground,
-    });
-
-    replaceAssembly(bottleGroup, config, materials, nextOptions);
-}
-
-export function setSodaBottleVisibility(bottleGroup, visible = true) {
-    if (!bottleGroup) return;
-
-    bottleGroup.visible = Boolean(visible);
-}
-
-export function setSodaBottleBubblesVisibility(bottleGroup, visible = true) {
-    const bubbles = bottleGroup?.getObjectByName("SodaBottleBubbles");
-
-    if (!bubbles) return;
-
-    bubbles.visible = Boolean(visible);
-}
-
-export function setSodaBottleLiquidVisibility(bottleGroup, visible = true) {
-    const liquid = bottleGroup?.getObjectByName("SodaLiquidGroup");
-
-    if (!liquid) return;
-
-    liquid.visible = Boolean(visible);
-}
-
-export function setSodaBottleCondensationVisibility(bottleGroup, visible = true) {
-    const condensation = bottleGroup?.getObjectByName("SodaBottleCondensation");
-
-    if (!condensation) return;
-
-    condensation.visible = Boolean(visible);
-}
-
-export function setSodaBottleTransform(
-    bottleGroup,
-    {
-        position,
-        rotation,
-        scale,
-    } = {},
-) {
-    if (!bottleGroup) return;
-
-    if (position) bottleGroup.position.set(position[0], position[1], position[2]);
-    if (rotation) bottleGroup.rotation.set(rotation[0], rotation[1], rotation[2]);
-    if (scale) bottleGroup.scale.set(scale[0], scale[1], scale[2]);
-}
-
-export function animateSodaBottle(bottleGroup, elapsedTime = 0) {
-    if (!bottleGroup) return;
-
-    const options = bottleGroup.userData?.options ?? DEFAULT_BOTTLE_OPTIONS;
-    const bubbles = bottleGroup.getObjectByName("SodaBubbleInstances");
-    const highlights = bottleGroup.getObjectByName("SodaBottleHighlights");
-    const condensation = bottleGroup.getObjectByName("CondensationDropInstances");
-
-    if (bubbles?.visible && bubbles.userData?.bubbles) {
+    if (bubbles?.isInstancedMesh && Array.isArray(bubbles.userData.bubbles)) {
         const dummy = new THREE.Object3D();
-        const data = bubbles.userData.bubbles;
-        const speed = bubbles.userData.speed ?? options.carbonationSpeed ?? 1;
+        const speed = bubbles.userData.speed ?? 0.55;
 
-        data.forEach((bubble, index) => {
-            const rise = (elapsedTime * 0.13 * speed + index * 0.013) % 1.05;
-            const y = -0.55 + rise;
-            const wobble = Math.sin(elapsedTime * 1.5 + bubble.phase) * 0.012;
+        bubbles.userData.bubbles.forEach((item, index) => {
+            const yOffset = Math.sin(elapsedTime * speed + item.phase) * 0.018;
+            const xOffset = Math.cos(elapsedTime * speed * 0.72 + item.phase) * 0.006;
 
             dummy.position.set(
-                bubble.base.x + wobble,
-                y,
-                bubble.base.z + Math.cos(elapsedTime + bubble.phase) * 0.01,
+                item.base.x + xOffset,
+                item.base.y + yOffset,
+                item.base.z,
             );
-
-            const pulse = bubble.scale * (1 + Math.sin(elapsedTime * 2 + bubble.phase) * 0.08);
-            dummy.scale.setScalar(pulse);
+            dummy.scale.setScalar(item.scale);
             dummy.updateMatrix();
 
             bubbles.setMatrixAt(index, dummy.matrix);
@@ -1273,58 +1216,183 @@ export function animateSodaBottle(bottleGroup, elapsedTime = 0) {
         bubbles.instanceMatrix.needsUpdate = true;
     }
 
-    if (condensation?.visible) {
-        condensation.rotation.y = Math.sin(elapsedTime * 0.18) * 0.018;
+    if (droplets?.isInstancedMesh && Array.isArray(droplets.userData.droplets)) {
+        const dummy = new THREE.Object3D();
+
+        droplets.userData.droplets.forEach((item, index) => {
+            const slide = Math.sin(elapsedTime * 0.22 + item.phase) * 0.004;
+
+            dummy.position.set(
+                item.base.x,
+                item.base.y - Math.abs(slide),
+                item.base.z,
+            );
+            dummy.scale.set(0.85 * item.scale, 1.25 * item.scale, 0.85 * item.scale);
+            dummy.updateMatrix();
+
+            droplets.setMatrixAt(index, dummy.matrix);
+        });
+
+        droplets.instanceMatrix.needsUpdate = true;
     }
 
-    if (highlights?.visible) {
-        highlights.rotation.y = Math.sin(elapsedTime * 0.45) * 0.035;
-
-        const main = highlights.getObjectByName("BottleMainHighlight");
-        const side = highlights.getObjectByName("BottleSideHighlight");
-
-        if (main?.material) {
-            main.material.opacity =
-                options.highlightIntensity +
-                Math.sin(elapsedTime * 1.2) * 0.045;
-        }
-
-        if (side?.material) {
-            side.material.opacity =
-                options.highlightIntensity * 0.58 +
-                Math.cos(elapsedTime * 1.05) * 0.026;
-        }
+    if (highlight?.material) {
+        highlight.material.opacity =
+            0.22 + Math.sin(elapsedTime * 1.2) * 0.035;
     }
 }
 
-export function getSodaBottleParts(bottleGroup) {
-    if (!bottleGroup) return {};
+export function updateSodaBottleLabel(sodaBottle, options = {}, textureSet = {}) {
+    if (!sodaBottle) return null;
+
+    const normalized = normalizeBottleOptions({
+        beverage: {
+            ...sodaBottle.userData,
+            ...options,
+        },
+    });
+
+    const labelMaterial = createLabelMaterial(normalized, textureSet);
+    const label = sodaBottle.getObjectByName("SodaBottleLabel");
+    const backLabel = sodaBottle.getObjectByName("SodaBottleBackLabel");
+
+    if (label?.material) {
+        disposeMaterial(label.material);
+        label.material = labelMaterial;
+    }
+
+    if (backLabel?.material) {
+        disposeMaterial(backLabel.material);
+        backLabel.material = labelMaterial.clone();
+        backLabel.material.opacity = 0.85;
+    }
+
+    sodaBottle.userData = {
+        ...sodaBottle.userData,
+        labelText: normalized.labelText,
+        subLabel: normalized.subLabel,
+        footerText: normalized.footerText,
+        beverageType: normalized.beverageType,
+        updatedAt: new Date().toISOString(),
+    };
+
+    return sodaBottle;
+}
+
+export function setSodaBottleVisibility(sodaBottle, visible = true) {
+    if (!sodaBottle) return;
+
+    sodaBottle.visible = Boolean(visible);
+    sodaBottle.userData.visible = Boolean(visible);
+}
+
+export function setSodaBottleLiquidVisibility(sodaBottle, visible = true) {
+    const liquid = sodaBottle?.getObjectByName("SodaBottleLiquidGroup");
+
+    if (!liquid) return;
+
+    liquid.visible = Boolean(visible);
+}
+
+export function setSodaBottleCondensationVisibility(sodaBottle, visible = true) {
+    const condensation = sodaBottle?.getObjectByName("SodaBottleCondensation");
+
+    if (!condensation) return;
+
+    condensation.visible = Boolean(visible);
+}
+
+export function setSodaBottleBubblesVisibility(sodaBottle, visible = true) {
+    const bubbles = sodaBottle?.getObjectByName("SodaBottleBubbles");
+
+    if (!bubbles) return;
+
+    bubbles.visible = Boolean(visible);
+}
+
+export function getSodaBottleParts(sodaBottle) {
+    if (!sodaBottle) return {};
 
     return {
-        assembly: bottleGroup.getObjectByName("SodaBottleAssembly"),
-        body: bottleGroup.getObjectByName("SodaBottleBody"),
-        shoulder: bottleGroup.getObjectByName("SodaBottleShoulder"),
-        grooves: bottleGroup.getObjectByName("SodaBottleGripGrooves"),
-        neck: bottleGroup.getObjectByName("SodaBottleNeck"),
-        cap: bottleGroup.getObjectByName("SodaBottleCap"),
-        capRidges: bottleGroup.getObjectByName("SodaBottleCapRidges"),
-        sportNozzle: bottleGroup.getObjectByName("SodaBottleSportNozzle"),
-        liquid: bottleGroup.getObjectByName("SodaLiquidGroup"),
-        label: bottleGroup.getObjectByName("SodaBottleLabel"),
-        backLabel: bottleGroup.getObjectByName("SodaBottleBackLabel"),
-        highlights: bottleGroup.getObjectByName("SodaBottleHighlights"),
-        bubbles: bottleGroup.getObjectByName("SodaBottleBubbles"),
-        bubbleInstances: bottleGroup.getObjectByName("SodaBubbleInstances"),
-        condensation: bottleGroup.getObjectByName("SodaBottleCondensation"),
-        condensationInstances: bottleGroup.getObjectByName("CondensationDropInstances"),
-        baseRing: bottleGroup.getObjectByName("SodaBottleBaseRing"),
-        shadow: bottleGroup.getObjectByName("SodaBottleContactShadow"),
+        body: sodaBottle.getObjectByName("SodaBottleBody"),
+        bottom: sodaBottle.getObjectByName("SodaBottleBottomRing"),
+        neck: sodaBottle.getObjectByName("SodaBottleNeck"),
+        cap: sodaBottle.getObjectByName("SodaBottleCap"),
+        capRidges: sodaBottle.getObjectByName("SodaBottleCapRidges"),
+        sportNozzle: sodaBottle.getObjectByName("SodaBottleSportNozzle"),
+        canTop: sodaBottle.getObjectByName("CanTopDetail"),
+        gripGrooves: sodaBottle.getObjectByName("SodaBottleGripGrooves"),
+        liquid: sodaBottle.getObjectByName("SodaBottleLiquidGroup"),
+        label: sodaBottle.getObjectByName("SodaBottleLabel"),
+        backLabel: sodaBottle.getObjectByName("SodaBottleBackLabel"),
+        highlights: sodaBottle.getObjectByName("SodaBottleHighlights"),
+        bubbles: sodaBottle.getObjectByName("SodaBottleBubbles"),
+        condensation: sodaBottle.getObjectByName("SodaBottleCondensation"),
+        baseRing: sodaBottle.getObjectByName("SodaBottleBaseRing"),
+        shadow: sodaBottle.getObjectByName("SodaBottleSoftShadow"),
     };
 }
 
-export function disposeSodaBottle(bottleGroup) {
-    if (!bottleGroup) return;
-
-    disposeObjectResources(bottleGroup);
-    bottleGroup.removeFromParent();
+function disposeTexture(texture) {
+    if (texture?.dispose) {
+        texture.dispose();
+    }
 }
+
+function disposeMaterial(material) {
+    if (!material) return;
+
+    const materials = Array.isArray(material) ? material : [material];
+
+    materials.forEach((item) => {
+        if (!item) return;
+
+        disposeTexture(item.map);
+        disposeTexture(item.normalMap);
+        disposeTexture(item.roughnessMap);
+        disposeTexture(item.metalnessMap);
+        disposeTexture(item.alphaMap);
+        disposeTexture(item.emissiveMap);
+
+        if (item.userData?.texture) {
+            disposeTexture(item.userData.texture);
+        }
+
+        if (item.dispose) {
+            item.dispose();
+        }
+    });
+}
+
+export function disposeSodaBottle(sodaBottle) {
+    if (!sodaBottle) return;
+
+    sodaBottle.traverse((object) => {
+        if (object.geometry?.dispose) {
+            object.geometry.dispose();
+        }
+
+        if (object.material) {
+            disposeMaterial(object.material);
+        }
+    });
+
+    sodaBottle.removeFromParent();
+}
+
+export const SodaBottle = Object.freeze({
+    version: SODA_BOTTLE_VERSION,
+    orientation: BOTTLE_ORIENTATION,
+    renderMode: BOTTLE_RENDER_MODE,
+    shapes: BOTTLE_SHAPES,
+
+    createSodaBottle,
+    updateSodaBottleAnimation,
+    updateSodaBottleLabel,
+    setSodaBottleVisibility,
+    setSodaBottleLiquidVisibility,
+    setSodaBottleCondensationVisibility,
+    setSodaBottleBubblesVisibility,
+    getSodaBottleParts,
+    disposeSodaBottle,
+});
