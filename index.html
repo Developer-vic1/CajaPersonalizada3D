@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KickOff Box 3D - Simulador de Caja Personalizada</title>
+
+    <meta name="description"
+        content="Simulador 3D interactivo de KickOff Box, una caja de regalo personalizada para presentes académicos." />
+
+    <link rel="stylesheet" href="/src/styles.css" />
+</head>
+
+<body>
+    <main class="app">
+        <aside class="sidebar">
+            <section class="brand">
+                <span class="brand__tag">Simulador 3D</span>
+                <h1>KickOff Box</h1>
+                <p>
+                    Visualización interactiva de una caja de regalo personalizada para
+                    presentes académicos, pensada para defensas, presentaciones finales
+                    y proyectos universitarios.
+                </p>
+            </section>
+
+            <section class="panel">
+                <h2>Configuración del producto</h2>
+
+                <div class="control-group">
+                    <label for="preset">Versión de KickOff Box</label>
+                    <select id="preset">
+                        <option value="basica">Básica</option>
+                        <option value="estandar" selected>Estándar</option>
+                        <option value="premium">Premium</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="boxColor">Color exterior</label>
+                    <input id="boxColor" type="color" value="#c89f72" />
+                </div>
+
+                <div class="control-group">
+                    <label for="interiorColor">Color interior</label>
+                    <input id="interiorColor" type="color" value="#f3e0c5" />
+                </div>
+
+                <button id="toggleLid" type="button">Abrir / cerrar caja</button>
+            </section>
+
+            <section class="legend">
+                <h2>Contenido del presente</h2>
+                <ul>
+                    <li>Tarjeta o mensaje personalizado</li>
+                    <li>Rosa decorativa tricolor</li>
+                    <li>Pastelito o detalle dulce</li>
+                    <li>Refresco pequeño</li>
+                    <li>Llavero o souvenir en resina</li>
+                    <li>Código QR interactivo</li>
+                </ul>
+            </section>
+        </aside>
+
+        <section class="viewer">
+            <div class="viewer__header">
+                <div>
+                    <span>Vista previa</span>
+                    <h2>Modelo tridimensional editable</h2>
+                </div>
+
+                <p>
+                    Rota, acerca o aleja la escena para explorar la caja y su contenido.
+                </p>
+            </div>
+
+            <div id="canvas-container" class="canvas-container">
+                <div id="loading" class="loading">Preparando simulación 3D...</div>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
