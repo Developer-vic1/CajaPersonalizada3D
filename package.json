@@ -1,0 +1,29 @@
+{
+    "name": "caja-personalizada-3d",
+    "version": "1.0.0",
+    "description": "Simulador 3D interactivo de una caja decorativa personalizada para presentes academicos.",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "dev": "vite --host 0.0.0.0",
+        "start": "vite --host 0.0.0.0",
+        "build": "vite build",
+        "preview": "vite preview --host 0.0.0.0"
+    },
+    "dependencies": {
+        "three": "^0.170.0"
+    },
+    "devDependencies": {
+        "vite": "^5.4.11"
+    },
+    "keywords": [
+        "threejs",
+        "vite",
+        "simulacion-3d",
+        "caja-personalizada",
+        "emprendimiento",
+        "mockup-3d"
+    ],
+    "author": "Victor",
+    "license": "MIT"
+}
