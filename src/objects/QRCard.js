@@ -8,22 +8,295 @@ import {
     setMeshShadow,
 } from "../utils/dimensions.js";
 
-const DEFAULT_QR_OPTIONS = {
+import {
+    createQRCardTexture,
+    createMaterialFromTexture,
+} from "../utils/textureFactory.js";
+
+export const QR_CARD_VERSION = "2.0.0";
+
+export const QR_CARD_STYLES = Object.freeze({
+    PREMIUM: "premium",
+    DEFENSE: "defense",
+    JURY: "jury",
+    INSTITUTIONAL: "institutional",
+    BOLIVIA_WORLD_CUP: "bolivia-world-cup",
+    TECH_ACADEMIC: "tech-academic",
+    MINIMAL: "minimal",
+});
+
+export const QR_CARD_ORIENTATION = Object.freeze({
+    FLAT: "flat",
+    LEANING: "leaning",
+    STANDING: "standing",
+    SLOT: "slot",
+});
+
+export const QR_CARD_FINISHES = Object.freeze({
+    MATTE: "matte",
+    SATIN: "satin",
+    GLOSSY: "glossy",
+    LAMINATED: "laminated",
+});
+
+export const QR_CARD_SCAN_STATUS = Object.freeze({
+    REAL: "real",
+    VISUAL_ONLY: "visual-only",
+    FAILED: "failed",
+});
+
+const DEFAULT_QR_DATA = Object.freeze({
     title: "Contenido digital",
     subtitle: "Escanea para ver el proyecto",
     footer: "KickOff Box 2026",
     qrValue: "https://example.com/kickoff-box",
-    qrSize: 520,
+    helperText: "Mensaje · Proyecto · Galería · Certificado digital",
+    accessLabel: "Acceso digital",
+});
+
+const DEFAULT_QR_OPTIONS = Object.freeze({
+    style: QR_CARD_STYLES.PREMIUM,
+    orientation: QR_CARD_ORIENTATION.FLAT,
+    finish: QR_CARD_FINISHES.SATIN,
+
+    width: 0.92,
+    height: 0.052,
+    depth: 0.92,
+
+    cornerRadius: 0.036,
+    cornerSegments: 5,
+
+    surfaceInset: 0.055,
+    surfaceLift: 0.007,
+
     canvasWidth: 1400,
-    canvasHeight: 1000,
+    canvasHeight: 1400,
+    qrSize: 620,
     errorCorrectionLevel: "H",
+    margin: 2,
+
+    paperColor: "#fff7e8",
+    paperBackColor: "#e5d2b2",
     darkColor: "#2b2118",
-    lightColor: "#fff7e8",
-    cardColor: "#fff7e8",
+    lightColor: "#fffdf8",
+    textColor: "#2b2118",
     accentColor: "#c59a4a",
+    secondaryAccent: "#b92d2d",
+    greenAccent: "#2f7d55",
+
+    showBody: true,
+    showSurface: true,
+    showBack: true,
+    showGoldBorder: true,
     showCornerMarks: true,
-    showMiniLogoPlaceholder: true,
-};
+    showMiniLogo: true,
+    showStand: false,
+    showSlotBase: true,
+    showScanBeam: true,
+    showPhysicalSeal: true,
+    showShadow: true,
+    showPaperLayers: true,
+
+    opacity: 1,
+    renderOrder: 9,
+});
+
+const STYLE_PRESETS = Object.freeze({
+    [QR_CARD_STYLES.PREMIUM]: Object.freeze({
+        paperColor: "#fff7e8",
+        paperBackColor: "#e5d2b2",
+        textColor: "#2b2118",
+        darkColor: "#2b2118",
+        lightColor: "#fffdf8",
+        accentColor: "#c59a4a",
+        secondaryAccent: "#b92d2d",
+        greenAccent: "#2f7d55",
+        showCornerMarks: true,
+        showMiniLogo: true,
+        showPhysicalSeal: true,
+    }),
+
+    [QR_CARD_STYLES.DEFENSE]: Object.freeze({
+        paperColor: "#fffaf0",
+        paperBackColor: "#e8d5b7",
+        textColor: "#24180f",
+        darkColor: "#24180f",
+        lightColor: "#fffdf8",
+        accentColor: "#c59a4a",
+        secondaryAccent: "#8b1f1f",
+        greenAccent: "#2f7d55",
+        showCornerMarks: true,
+        showMiniLogo: true,
+        showPhysicalSeal: true,
+    }),
+
+    [QR_CARD_STYLES.JURY]: Object.freeze({
+        paperColor: "#fff7e8",
+        paperBackColor: "#dcc7a7",
+        textColor: "#2b2118",
+        darkColor: "#2b2118",
+        lightColor: "#fffdf8",
+        accentColor: "#c59a4a",
+        secondaryAccent: "#7a4f2a",
+        greenAccent: "#2f7d55",
+        showCornerMarks: false,
+        showMiniLogo: true,
+        showPhysicalSeal: true,
+    }),
+
+    [QR_CARD_STYLES.INSTITUTIONAL]: Object.freeze({
+        paperColor: "#f8f3ea",
+        paperBackColor: "#dfd1bd",
+        textColor: "#111827",
+        darkColor: "#111827",
+        lightColor: "#ffffff",
+        accentColor: "#2f86c7",
+        secondaryAccent: "#c59a4a",
+        greenAccent: "#2f7d55",
+        showCornerMarks: true,
+        showMiniLogo: true,
+        showPhysicalSeal: true,
+    }),
+
+    [QR_CARD_STYLES.BOLIVIA_WORLD_CUP]: Object.freeze({
+        paperColor: "#fff7e8",
+        paperBackColor: "#e4cda8",
+        textColor: "#2b2118",
+        darkColor: "#2b2118",
+        lightColor: "#fffdf8",
+        accentColor: "#f0c84b",
+        secondaryAccent: "#b92d2d",
+        greenAccent: "#2f7d55",
+        showCornerMarks: true,
+        showMiniLogo: true,
+        showPhysicalSeal: true,
+    }),
+
+    [QR_CARD_STYLES.TECH_ACADEMIC]: Object.freeze({
+        paperColor: "#f8fbff",
+        paperBackColor: "#dce8f4",
+        textColor: "#111827",
+        darkColor: "#111827",
+        lightColor: "#ffffff",
+        accentColor: "#2f86c7",
+        secondaryAccent: "#c59a4a",
+        greenAccent: "#2f7d55",
+        showCornerMarks: true,
+        showMiniLogo: true,
+        showPhysicalSeal: false,
+    }),
+
+    [QR_CARD_STYLES.MINIMAL]: Object.freeze({
+        paperColor: "#ffffff",
+        paperBackColor: "#e8e2d7",
+        textColor: "#1f2937",
+        darkColor: "#111827",
+        lightColor: "#ffffff",
+        accentColor: "#c59a4a",
+        secondaryAccent: "#374151",
+        greenAccent: "#2f7d55",
+        showCornerMarks: false,
+        showMiniLogo: false,
+        showPhysicalSeal: false,
+    }),
+});
+
+function normalizeOptions(config = {}, extraOptions = {}) {
+    const source = config.qrCard ?? config.qr ?? config;
+    const visual = config.visual ?? config.sceneConfig?.visual ?? {};
+    const qr = config.qr ?? config.content?.qr ?? {};
+    const project = config.project ?? config.content?.project ?? {};
+
+    const style =
+        source.style ??
+        visual.qrCardStyle ??
+        QR_CARD_STYLES.PREMIUM;
+
+    const preset = STYLE_PRESETS[style] ?? STYLE_PRESETS[QR_CARD_STYLES.PREMIUM];
+
+    const qrData = {
+        ...DEFAULT_QR_DATA,
+        title:
+            qr.title ??
+            source.title ??
+            extraOptions.title ??
+            DEFAULT_QR_DATA.title,
+        subtitle:
+            qr.subtitle ??
+            source.subtitle ??
+            extraOptions.subtitle ??
+            DEFAULT_QR_DATA.subtitle,
+        footer:
+            qr.footer ??
+            source.footer ??
+            extraOptions.footer ??
+            DEFAULT_QR_DATA.footer,
+        qrValue:
+            qr.value ??
+            qr.qrValue ??
+            source.value ??
+            source.qrValue ??
+            extraOptions.qrValue ??
+            DEFAULT_QR_DATA.qrValue,
+        helperText:
+            qr.helperText ??
+            source.helperText ??
+            DEFAULT_QR_DATA.helperText,
+        accessLabel:
+            qr.accessLabel ??
+            source.accessLabel ??
+            DEFAULT_QR_DATA.accessLabel,
+        projectName:
+            project.projectName ??
+            source.projectName ??
+            "Proyecto académico",
+        teamName:
+            project.teamName ??
+            source.teamName ??
+            "Equipo",
+    };
+
+    return {
+        ...DEFAULT_QR_OPTIONS,
+        ...preset,
+        ...source,
+        ...extraOptions,
+        style,
+        qrData,
+
+        paperColor:
+            visual.qrPaperColor ??
+            source.paperColor ??
+            preset.paperColor,
+        textColor:
+            visual.qrTextColor ??
+            source.textColor ??
+            preset.textColor,
+        accentColor:
+            visual.accentColor ??
+            source.accentColor ??
+            preset.accentColor,
+        darkColor:
+            source.darkColor ??
+            preset.darkColor,
+        lightColor:
+            source.lightColor ??
+            preset.lightColor,
+
+        showCornerMarks:
+            source.showCornerMarks ??
+            preset.showCornerMarks ??
+            DEFAULT_QR_OPTIONS.showCornerMarks,
+        showMiniLogo:
+            source.showMiniLogo ??
+            preset.showMiniLogo ??
+            DEFAULT_QR_OPTIONS.showMiniLogo,
+        showPhysicalSeal:
+            source.showPhysicalSeal ??
+            preset.showPhysicalSeal ??
+            DEFAULT_QR_OPTIONS.showPhysicalSeal,
+    };
+}
 
 function createRoundedMesh({
     name,
@@ -33,6 +306,9 @@ function createRoundedMesh({
     radius = 0.035,
     segments = 4,
     material,
+    position = [0, 0, 0],
+    rotation = [0, 0, 0],
+    userData = {},
 }) {
     const safeRadius = Math.min(radius, width / 2, height / 2, depth / 2);
 
@@ -44,15 +320,102 @@ function createRoundedMesh({
         safeRadius,
     );
 
+    geometry.computeVertexNormals();
+
     const mesh = new THREE.Mesh(geometry, material);
     mesh.name = name;
+    mesh.position.set(position[0], position[1], position[2]);
+    mesh.rotation.set(rotation[0], rotation[1], rotation[2]);
+    mesh.userData = {
+        generatedBy: "QRCard",
+        version: QR_CARD_VERSION,
+        ...userData,
+    };
 
     setMeshShadow(mesh, true, true);
 
     return mesh;
 }
 
-function drawRoundedRect(ctx, x, y, width, height, radius) {
+function createPaperMaterial(name, color, options = {}) {
+    const finishSettings = {
+        [QR_CARD_FINISHES.MATTE]: {
+            roughness: 0.92,
+            metalness: 0.0,
+            clearcoat: 0,
+            clearcoatRoughness: 0.7,
+        },
+        [QR_CARD_FINISHES.SATIN]: {
+            roughness: 0.62,
+            metalness: 0.01,
+            clearcoat: 0.18,
+            clearcoatRoughness: 0.32,
+        },
+        [QR_CARD_FINISHES.GLOSSY]: {
+            roughness: 0.28,
+            metalness: 0.02,
+            clearcoat: 0.45,
+            clearcoatRoughness: 0.12,
+        },
+        [QR_CARD_FINISHES.LAMINATED]: {
+            roughness: 0.18,
+            metalness: 0.015,
+            clearcoat: 0.68,
+            clearcoatRoughness: 0.08,
+        },
+    }[options.finish] ?? {};
+
+    const material = new THREE.MeshPhysicalMaterial({
+        name,
+        color,
+        roughness: finishSettings.roughness ?? 0.62,
+        metalness: finishSettings.metalness ?? 0.01,
+        clearcoat: finishSettings.clearcoat ?? 0.18,
+        clearcoatRoughness: finishSettings.clearcoatRoughness ?? 0.32,
+        transparent: options.opacity < 1,
+        opacity: options.opacity,
+        side: THREE.DoubleSide,
+    });
+
+    material.userData = {
+        generatedBy: "QRCard",
+        version: QR_CARD_VERSION,
+        finish: options.finish,
+    };
+
+    return material;
+}
+
+function createGoldMaterial(options = {}) {
+    return new THREE.MeshStandardMaterial({
+        name: "QRCardGoldDetailMaterial",
+        color: options.accentColor,
+        roughness: 0.32,
+        metalness: 0.3,
+    });
+}
+
+function createDarkMaterial(options = {}) {
+    return new THREE.MeshStandardMaterial({
+        name: "QRCardDarkSupportMaterial",
+        color: options.darkColor,
+        roughness: 0.72,
+        metalness: 0.04,
+    });
+}
+
+function createTransparentGuideMaterial(options = {}) {
+    return new THREE.MeshBasicMaterial({
+        name: "QRCardTransparentGuideMaterial",
+        color: options.accentColor,
+        transparent: true,
+        opacity: 0.18,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+    });
+}
+
+function roundedRectPath(ctx, x, y, width, height, radius) {
     const safeRadius = Math.min(radius, width / 2, height / 2);
 
     ctx.beginPath();
@@ -68,88 +431,195 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
     ctx.closePath();
 }
 
-function drawCornerMarks(ctx, canvasWidth, canvasHeight, color) {
-    const margin = 70;
-    const length = 95;
-    const thickness = 14;
+function drawMultilineText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 2) {
+    const words = String(text ?? "").split(/\s+/);
+    const lines = [];
+    let line = "";
 
-    ctx.fillStyle = color;
+    words.forEach((word) => {
+        const testLine = line ? `${line} ${word}` : word;
+
+        if (ctx.measureText(testLine).width > maxWidth && line) {
+            lines.push(line);
+            line = word;
+        } else {
+            line = testLine;
+        }
+    });
+
+    if (line) lines.push(line);
+
+    const visibleLines = lines.slice(0, maxLines);
+    const startY = y - ((visibleLines.length - 1) * lineHeight) / 2;
+
+    visibleLines.forEach((currentLine, index) => {
+        const finalLine =
+            index === maxLines - 1 && lines.length > maxLines
+                ? `${currentLine.replace(/\.*$/, "")}...`
+                : currentLine;
+
+        ctx.fillText(finalLine, x, startY + index * lineHeight);
+    });
+}
+
+function drawCornerMarks(ctx, width, height, options) {
+    if (!options.showCornerMarks) return;
+
+    const margin = 72;
+    const length = 92;
+    const thickness = 13;
+
+    ctx.save();
+    ctx.fillStyle = options.accentColor;
 
     const corners = [
         [margin, margin, 1, 1],
-        [canvasWidth - margin, margin, -1, 1],
-        [margin, canvasHeight - margin, 1, -1],
-        [canvasWidth - margin, canvasHeight - margin, -1, -1],
+        [width - margin, margin, -1, 1],
+        [margin, height - margin, 1, -1],
+        [width - margin, height - margin, -1, -1],
     ];
 
     corners.forEach(([x, y, dirX, dirY]) => {
         ctx.fillRect(x, y, length * dirX, thickness * dirY);
         ctx.fillRect(x, y, thickness * dirX, length * dirY);
     });
+
+    ctx.restore();
 }
 
-function drawTechLines(ctx, canvasWidth, canvasHeight) {
+function drawBoliviaHeader(ctx, width, options) {
+    ctx.fillStyle = options.secondaryAccent;
+    ctx.fillRect(0, 0, width, 46);
+
+    ctx.fillStyle = "#f0c84b";
+    ctx.fillRect(0, 46, width, 46);
+
+    ctx.fillStyle = options.greenAccent;
+    ctx.fillRect(0, 92, width, 46);
+}
+
+function drawTechLines(ctx, width, height, options) {
     ctx.save();
 
-    ctx.strokeStyle = "rgba(43, 33, 24, 0.16)";
+    ctx.strokeStyle = hexToRgba(options.darkColor, 0.15);
     ctx.lineWidth = 5;
 
     const lines = [
-        [[120, 210], [220, 210], [260, 250]],
-        [[canvasWidth - 120, 210], [canvasWidth - 235, 210], [canvasWidth - 285, 260]],
-        [[160, canvasHeight - 170], [260, canvasHeight - 170], [305, canvasHeight - 220]],
-        [[canvasWidth - 150, canvasHeight - 170], [canvasWidth - 250, canvasHeight - 170], [canvasWidth - 300, canvasHeight - 215]],
+        [[120, 230], [220, 230], [280, 290]],
+        [[width - 120, 230], [width - 235, 230], [width - 300, 300]],
+        [[160, height - 170], [280, height - 170], [340, height - 245]],
+        [[width - 160, height - 170], [width - 280, height - 170], [width - 340, height - 245]],
     ];
 
     lines.forEach((line) => {
         ctx.beginPath();
         ctx.moveTo(line[0][0], line[0][1]);
 
-        for (let i = 1; i < line.length; i += 1) {
-            ctx.lineTo(line[i][0], line[i][1]);
+        for (let index = 1; index < line.length; index += 1) {
+            ctx.lineTo(line[index][0], line[index][1]);
         }
 
         ctx.stroke();
     });
 
-    ctx.fillStyle = "rgba(197, 154, 74, 0.75)";
+    ctx.fillStyle = hexToRgba(options.accentColor, 0.72);
 
     [
-        [260, 250],
-        [canvasWidth - 285, 260],
-        [305, canvasHeight - 220],
-        [canvasWidth - 300, canvasHeight - 215],
+        [280, 290],
+        [width - 300, 300],
+        [340, height - 245],
+        [width - 340, height - 245],
     ].forEach(([x, y]) => {
         ctx.beginPath();
-        ctx.arc(x, y, 13, 0, Math.PI * 2);
+        ctx.arc(x, y, 12, 0, Math.PI * 2);
         ctx.fill();
     });
 
     ctx.restore();
 }
 
-function drawMiniLogoPlaceholder(ctx, x, y, radius) {
+function drawMiniLogo(ctx, x, y, radius, options) {
+    if (!options.showMiniLogo) return;
+
     ctx.save();
 
-    ctx.fillStyle = "#fff7e8";
+    ctx.fillStyle = options.lightColor;
     ctx.beginPath();
     ctx.arc(x, y, radius, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.strokeStyle = "#ff8a00";
+    ctx.strokeStyle = options.accentColor;
     ctx.lineWidth = 8;
     ctx.stroke();
 
-    ctx.fillStyle = "#2b2118";
-    ctx.font = "bold 54px Arial";
+    ctx.fillStyle = options.darkColor;
+    ctx.font = "900 50px Arial, Helvetica, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("K", x, y + 4);
+    ctx.fillText("IS", x, y - 4);
+
+    ctx.fillStyle = options.accentColor;
+    ctx.font = "800 14px Arial, Helvetica, sans-serif";
+    ctx.fillText("UNIFRANZ", x, y + 35);
 
     ctx.restore();
 }
 
-function drawBaseCard(canvas, options, qrCanvas = null) {
+function drawPhysicalSeal(ctx, width, height, options) {
+    if (!options.showPhysicalSeal) return;
+
+    const x = width - 170;
+    const y = height - 160;
+    const radius = 58;
+
+    ctx.save();
+
+    ctx.fillStyle = options.accentColor;
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = options.darkColor;
+    ctx.beginPath();
+    ctx.arc(x, y, radius * 0.75, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = options.accentColor;
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.arc(x, y, radius * 0.56, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.fillStyle = options.accentColor;
+    ctx.font = "900 34px Arial, Helvetica, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("2026", x, y - 4);
+
+    ctx.font = "800 12px Arial, Helvetica, sans-serif";
+    ctx.fillText("KICKOFF", x, y + 28);
+
+    ctx.restore();
+}
+
+function drawPaperNoise(ctx, width, height) {
+    ctx.save();
+
+    for (let index = 0; index < 700; index += 1) {
+        const alpha = Math.random() * 0.028;
+        ctx.fillStyle = `rgba(80, 55, 30, ${alpha})`;
+        ctx.fillRect(
+            Math.random() * width,
+            Math.random() * height,
+            Math.random() * 2 + 0.4,
+            Math.random() * 2 + 0.4,
+        );
+    }
+
+    ctx.restore();
+}
+
+function drawBaseQRCard(canvas, options, qrCanvas = null, status = QR_CARD_SCAN_STATUS.VISUAL_ONLY) {
     const ctx = canvas.getContext("2d");
     const width = canvas.width;
     const height = canvas.height;
@@ -157,92 +627,186 @@ function drawBaseCard(canvas, options, qrCanvas = null) {
     ctx.clearRect(0, 0, width, height);
 
     const backgroundGradient = ctx.createLinearGradient(0, 0, width, height);
-    backgroundGradient.addColorStop(0, "#fff9ef");
-    backgroundGradient.addColorStop(0.52, options.cardColor);
-    backgroundGradient.addColorStop(1, "#f1d5aa");
+    backgroundGradient.addColorStop(0, options.paperColor);
+    backgroundGradient.addColorStop(0.55, "#fffdf8");
+    backgroundGradient.addColorStop(1, options.paperBackColor);
 
     ctx.fillStyle = backgroundGradient;
     ctx.fillRect(0, 0, width, height);
 
-    const accentGradient = ctx.createLinearGradient(0, 0, width, 0);
-    accentGradient.addColorStop(0, "rgba(185, 45, 45, 0.16)");
-    accentGradient.addColorStop(0.5, "rgba(240, 200, 75, 0.2)");
-    accentGradient.addColorStop(1, "rgba(47, 125, 85, 0.16)");
+    drawBoliviaHeader(ctx, width, options);
+    drawTechLines(ctx, width, height, options);
+    drawCornerMarks(ctx, width, height, options);
 
-    ctx.fillStyle = accentGradient;
-    ctx.fillRect(0, 0, width, height);
-
-    ctx.fillStyle = "#b92d2d";
-    ctx.fillRect(0, 0, width, 46);
-
-    ctx.fillStyle = "#f0c84b";
-    ctx.fillRect(0, 46, width, 46);
-
-    ctx.fillStyle = "#2f7d55";
-    ctx.fillRect(0, 92, width, 46);
-
-    if (options.showCornerMarks) {
-        drawCornerMarks(ctx, width, height, options.accentColor);
-    }
-
-    drawTechLines(ctx, width, height);
-
-    ctx.strokeStyle = "rgba(122, 79, 42, 0.38)";
-    ctx.lineWidth = 16;
-    drawRoundedRect(ctx, 64, 170, width - 128, height - 240, 42);
+    ctx.strokeStyle = hexToRgba(options.darkColor, 0.25);
+    ctx.lineWidth = 18;
+    roundedRectPath(ctx, 70, 180, width - 140, height - 250, 48);
     ctx.stroke();
 
-    ctx.strokeStyle = "rgba(197, 154, 74, 0.62)";
+    ctx.strokeStyle = hexToRgba(options.accentColor, 0.68);
     ctx.lineWidth = 8;
-    drawRoundedRect(ctx, 96, 202, width - 192, height - 304, 32);
+    roundedRectPath(ctx, 105, 215, width - 210, height - 320, 36);
     ctx.stroke();
 
-    ctx.fillStyle = "#7a1e1e";
-    ctx.font = "bold 74px Arial";
+    ctx.fillStyle = options.secondaryAccent;
+    ctx.font = "900 72px Arial, Helvetica, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(options.title, width / 2, 260);
+    drawMultilineText(ctx, options.qrData.title, width / 2, 270, width - 350, 78, 2);
 
-    ctx.fillStyle = "#2b2118";
-    ctx.font = "40px Arial";
-    ctx.fillText(options.subtitle, width / 2, 330);
+    ctx.fillStyle = options.textColor;
+    ctx.font = "700 38px Arial, Helvetica, sans-serif";
+    drawMultilineText(ctx, options.qrData.subtitle, width / 2, 350, width - 350, 44, 2);
 
-    const qrBoxSize = 560;
+    const qrBoxSize = 620;
     const qrBoxX = width / 2 - qrBoxSize / 2;
-    const qrBoxY = 385;
+    const qrBoxY = 420;
 
-    ctx.fillStyle = "#fffdf8";
-    drawRoundedRect(ctx, qrBoxX, qrBoxY, qrBoxSize, qrBoxSize, 34);
+    ctx.fillStyle = options.lightColor;
+    roundedRectPath(ctx, qrBoxX, qrBoxY, qrBoxSize, qrBoxSize, 38);
     ctx.fill();
 
-    ctx.strokeStyle = "rgba(43, 33, 24, 0.24)";
+    ctx.strokeStyle = hexToRgba(options.darkColor, 0.22);
     ctx.lineWidth = 10;
-    drawRoundedRect(ctx, qrBoxX, qrBoxY, qrBoxSize, qrBoxSize, 34);
+    roundedRectPath(ctx, qrBoxX, qrBoxY, qrBoxSize, qrBoxSize, 38);
     ctx.stroke();
 
     if (qrCanvas) {
-        const qrDrawSize = 472;
+        const qrDrawSize = 510;
         const qrDrawX = width / 2 - qrDrawSize / 2;
-        const qrDrawY = qrBoxY + 44;
+        const qrDrawY = qrBoxY + 55;
 
         ctx.drawImage(qrCanvas, qrDrawX, qrDrawY, qrDrawSize, qrDrawSize);
     } else {
-        ctx.fillStyle = "rgba(43, 33, 24, 0.12)";
-        ctx.font = "bold 42px Arial";
-        ctx.fillText("Generando QR...", width / 2, qrBoxY + qrBoxSize / 2);
+        drawVisualQR(ctx, width / 2 - 255, qrBoxY + 55, 510, options);
     }
 
-    if (options.showMiniLogoPlaceholder) {
-        drawMiniLogoPlaceholder(ctx, width / 2, qrBoxY + qrBoxSize / 2, 62);
+    drawMiniLogo(ctx, width / 2, qrBoxY + qrBoxSize / 2, 62, options);
+
+    ctx.fillStyle =
+        status === QR_CARD_SCAN_STATUS.REAL
+            ? hexToRgba(options.greenAccent, 0.92)
+            : hexToRgba(options.accentColor, 0.92);
+
+    ctx.font = "900 28px Arial, Helvetica, sans-serif";
+    ctx.fillText(
+        status === QR_CARD_SCAN_STATUS.REAL ? "QR ESCANEABLE" : "VISTA QR",
+        width / 2,
+        qrBoxY + qrBoxSize + 52,
+    );
+
+    ctx.fillStyle = options.textColor;
+    ctx.font = "900 34px Arial, Helvetica, sans-serif";
+    drawMultilineText(ctx, options.qrData.footer, width / 2, height - 150, width - 360, 40, 2);
+
+    ctx.fillStyle = hexToRgba(options.textColor, 0.62);
+    ctx.font = "700 24px Arial, Helvetica, sans-serif";
+    drawMultilineText(ctx, options.qrData.helperText, width / 2, height - 93, width - 340, 30, 2);
+
+    drawPhysicalSeal(ctx, width, height, options);
+    drawPaperNoise(ctx, width, height);
+}
+
+function drawVisualQR(ctx, x, y, size, options) {
+    const modules = 29;
+    const cell = size / modules;
+    const seed = String(options.qrData.qrValue ?? "kickoff-box");
+
+    ctx.save();
+
+    ctx.fillStyle = options.lightColor;
+    ctx.fillRect(x, y, size, size);
+
+    function hashAt(index) {
+        let hash = 0;
+        const text = `${seed}:${index}`;
+
+        for (let i = 0; i < text.length; i += 1) {
+            hash = (hash << 5) - hash + text.charCodeAt(i);
+            hash |= 0;
+        }
+
+        return Math.abs(hash);
     }
 
-    ctx.fillStyle = "#2b2118";
-    ctx.font = "bold 36px Arial";
-    ctx.fillText(options.footer, width / 2, height - 94);
+    function drawFinder(col, row) {
+        const fx = x + col * cell;
+        const fy = y + row * cell;
 
-    ctx.fillStyle = "rgba(43, 33, 24, 0.64)";
-    ctx.font = "28px Arial";
-    ctx.fillText("Mensaje · Proyecto · Galería · Certificado digital", width / 2, height - 48);
+        ctx.fillStyle = options.darkColor;
+        ctx.fillRect(fx, fy, cell * 7, cell * 7);
+
+        ctx.fillStyle = options.lightColor;
+        ctx.fillRect(fx + cell, fy + cell, cell * 5, cell * 5);
+
+        ctx.fillStyle = options.darkColor;
+        ctx.fillRect(fx + cell * 2, fy + cell * 2, cell * 3, cell * 3);
+    }
+
+    for (let row = 0; row < modules; row += 1) {
+        for (let col = 0; col < modules; col += 1) {
+            const inFinder =
+                (col < 8 && row < 8) ||
+                (col > modules - 9 && row < 8) ||
+                (col < 8 && row > modules - 9);
+
+            if (inFinder) continue;
+
+            const hash = hashAt(row * modules + col);
+            const shouldFill = hash % 5 === 0 || hash % 7 === 0 || hash % 11 === 0;
+
+            if (shouldFill) {
+                ctx.fillStyle = options.darkColor;
+                ctx.fillRect(
+                    Math.round(x + col * cell),
+                    Math.round(y + row * cell),
+                    Math.ceil(cell * 0.92),
+                    Math.ceil(cell * 0.92),
+                );
+            }
+        }
+    }
+
+    drawFinder(0, 0);
+    drawFinder(modules - 7, 0);
+    drawFinder(0, modules - 7);
+
+    ctx.restore();
+}
+
+function hexToRgba(hex, alpha = 1) {
+    const value = String(hex).replace("#", "");
+    const bigint = Number.parseInt(
+        value.length === 3
+            ? value.split("").map((char) => char + char).join("")
+            : value,
+        16,
+    );
+
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function createQRTextureFallback(options) {
+    const resource = createQRCardTexture({
+        title: options.qrData.title,
+        subtitle: options.qrData.subtitle,
+        footer: options.qrData.footer,
+        value: options.qrData.qrValue,
+        background: options.paperColor,
+        foreground: options.darkColor,
+        accentColor: options.accentColor,
+    });
+
+    return {
+        canvas: resource.canvas,
+        texture: resource.texture,
+        status: QR_CARD_SCAN_STATUS.VISUAL_ONLY,
+        error: null,
+    };
 }
 
 function createQRCanvasTexture(options) {
@@ -250,21 +814,28 @@ function createQRCanvasTexture(options) {
     canvas.width = options.canvasWidth;
     canvas.height = options.canvasHeight;
 
-    drawBaseCard(canvas, options);
+    drawBaseQRCard(canvas, options, null, QR_CARD_SCAN_STATUS.VISUAL_ONLY);
 
     const texture = new THREE.CanvasTexture(canvas);
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.anisotropy = 8;
     texture.needsUpdate = true;
 
+    texture.userData = {
+        generatedBy: "QRCard",
+        version: QR_CARD_VERSION,
+        status: QR_CARD_SCAN_STATUS.VISUAL_ONLY,
+        qrValue: options.qrData.qrValue,
+    };
+
     const qrCanvas = document.createElement("canvas");
 
     QRCode.toCanvas(
         qrCanvas,
-        options.qrValue,
+        options.qrData.qrValue,
         {
             width: options.qrSize,
-            margin: 2,
+            margin: options.margin,
             errorCorrectionLevel: options.errorCorrectionLevel,
             color: {
                 dark: options.darkColor,
@@ -273,11 +844,15 @@ function createQRCanvasTexture(options) {
         },
         (error) => {
             if (error) {
-                console.error("No se pudo generar el QR:", error);
+                texture.userData.status = QR_CARD_SCAN_STATUS.FAILED;
+                texture.userData.error = error.message;
+                drawBaseQRCard(canvas, options, null, QR_CARD_SCAN_STATUS.FAILED);
+                texture.needsUpdate = true;
                 return;
             }
 
-            drawBaseCard(canvas, options, qrCanvas);
+            texture.userData.status = QR_CARD_SCAN_STATUS.REAL;
+            drawBaseQRCard(canvas, options, qrCanvas, QR_CARD_SCAN_STATUS.REAL);
             texture.needsUpdate = true;
         },
     );
@@ -285,19 +860,40 @@ function createQRCanvasTexture(options) {
     return {
         canvas,
         texture,
+        status: QR_CARD_SCAN_STATUS.REAL,
     };
 }
 
-function createQRSurfaceMaterial(options) {
-    const { texture } = createQRCanvasTexture(options);
+function createSurfaceMaterial(options, textureSet = {}) {
+    const texture =
+        textureSet.qrCard?.texture ??
+        createQRCanvasTexture(options).texture;
 
-    const material = new THREE.MeshBasicMaterial({
-        name: "QRCardSurfaceMaterial",
-        map: texture,
-        side: THREE.DoubleSide,
-    });
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.anisotropy = 8;
+    texture.needsUpdate = true;
 
+    const material = createMaterialFromTexture
+        ? createMaterialFromTexture(texture, {
+            materialType: options.finish === QR_CARD_FINISHES.MATTE ? "standard" : "physical",
+            transparent: true,
+            opacity: options.opacity,
+            roughness: options.finish === QR_CARD_FINISHES.GLOSSY ? 0.22 : 0.48,
+            metalness: 0.01,
+            clearcoat: options.finish === QR_CARD_FINISHES.LAMINATED ? 0.62 : 0.28,
+            clearcoatRoughness: 0.14,
+        })
+        : new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: true,
+            opacity: options.opacity,
+            side: THREE.DoubleSide,
+        });
+
+    material.name = "QRCardSurfaceMaterial";
     material.userData = {
+        ...(material.userData ?? {}),
+        generatedBy: "QRCard",
         texture,
         options,
     };
@@ -305,260 +901,511 @@ function createQRSurfaceMaterial(options) {
     return material;
 }
 
-function createQRCardBody(config, materials) {
-    const layout = config?.contentLayout?.qrCard ?? {};
-    const size = layout.size ?? {
-        width: 0.95,
-        height: 0.05,
-        depth: 0.95,
-    };
+function createQRCardBody(options) {
+    const material = createPaperMaterial(
+        "QRCardBodyMaterial",
+        options.paperColor,
+        options,
+    );
 
     const body = createRoundedMesh({
         name: "QRCardBody",
-        width: size.width,
-        height: size.height,
-        depth: size.depth,
-        radius: 0.035,
-        segments: 5,
-        material: materials.paper,
+        width: options.width,
+        height: options.height,
+        depth: options.depth,
+        radius: options.cornerRadius,
+        segments: options.cornerSegments,
+        material,
+        userData: {
+            part: "body",
+        },
     });
+
+    body.visible = Boolean(options.showBody);
 
     return body;
 }
 
-function createQRCardSurface(config, options) {
-    const layout = config?.contentLayout?.qrCard ?? {};
-    const size = layout.size ?? {
-        width: 0.95,
-        height: 0.05,
-        depth: 0.95,
-    };
-
-    const surface = new THREE.Mesh(
-        new THREE.PlaneGeometry(size.width * 0.9, size.depth * 0.9),
-        createQRSurfaceMaterial(options),
+function createQRCardBack(options) {
+    const material = createPaperMaterial(
+        "QRCardBackMaterial",
+        options.paperBackColor,
+        {
+            ...options,
+            finish: QR_CARD_FINISHES.MATTE,
+        },
     );
-
-    surface.name = "QRCardSurface";
-    surface.rotation.x = -Math.PI / 2;
-    surface.position.y = size.height / 2 + 0.006;
-    surface.renderOrder = 6;
-
-    return surface;
-}
-
-function createQRCardBack(config, materials) {
-    const layout = config?.contentLayout?.qrCard ?? {};
-    const size = layout.size ?? {
-        width: 0.95,
-        height: 0.05,
-        depth: 0.95,
-    };
-
-    const backMaterial = materials.paperBack ?? materials.paper;
 
     const back = createRoundedMesh({
         name: "QRCardBack",
-        width: size.width * 0.92,
-        height: 0.022,
-        depth: size.depth * 0.92,
-        radius: 0.03,
-        segments: 4,
-        material: backMaterial,
+        width: options.width * 0.96,
+        height: options.height * 0.38,
+        depth: options.depth * 0.96,
+        radius: options.cornerRadius * 0.82,
+        segments: options.cornerSegments,
+        material,
+        position: [0, -options.height * 0.58, 0],
+        userData: {
+            part: "back",
+        },
     });
 
-    back.position.y = -size.height / 2 - 0.012;
+    back.visible = Boolean(options.showBack);
 
     return back;
 }
 
-function createQRCardBorder(config, materials) {
-    const group = new THREE.Group();
-    group.name = "QRCardBorder";
+function createQRCardSurface(options, textureSet = {}) {
+    const surfaceWidth = options.width - options.surfaceInset * 2;
+    const surfaceDepth = options.depth - options.surfaceInset * 2;
 
-    const layout = config?.contentLayout?.qrCard ?? {};
-    const size = layout.size ?? {
-        width: 0.95,
-        height: 0.05,
-        depth: 0.95,
+    const surface = new THREE.Mesh(
+        new THREE.PlaneGeometry(surfaceWidth, surfaceDepth, 4, 4),
+        createSurfaceMaterial(options, textureSet),
+    );
+
+    surface.name = "QRCardSurface";
+    surface.rotation.x = -Math.PI / 2;
+    surface.position.y = options.height / 2 + options.surfaceLift;
+    surface.renderOrder = options.renderOrder;
+    surface.visible = Boolean(options.showSurface);
+    surface.userData = {
+        generatedBy: "QRCard",
+        part: "surface",
+        editable: true,
+        qrData: options.qrData,
     };
 
-    const y = size.height / 2 + 0.018;
-    const borderThickness = 0.025;
+    setMeshShadow(surface, false, true);
+
+    return surface;
+}
+
+function createQRCardBorder(options) {
+    const group = new THREE.Group();
+    group.name = "QRCardBorder";
+    group.visible = Boolean(options.showGoldBorder);
+
+    const material = createGoldMaterial(options);
+    const y = options.height / 2 + options.surfaceLift + 0.014;
+    const borderThickness = 0.014;
+    const w = options.width - options.surfaceInset * 1.15;
+    const d = options.depth - options.surfaceInset * 1.15;
 
     const top = createRoundedMesh({
         name: "QRBorderTop",
-        width: size.width,
-        height: 0.014,
+        width: w,
+        height: borderThickness,
         depth: borderThickness,
-        radius: 0.008,
-        segments: 3,
-        material: materials.gold,
+        radius: 0.006,
+        segments: 2,
+        material,
+        position: [0, y, -d / 2],
+        userData: { part: "border" },
     });
-    top.position.set(0, y, -size.depth / 2);
 
     const bottom = createRoundedMesh({
         name: "QRBorderBottom",
-        width: size.width,
-        height: 0.014,
+        width: w,
+        height: borderThickness,
         depth: borderThickness,
-        radius: 0.008,
-        segments: 3,
-        material: materials.gold,
+        radius: 0.006,
+        segments: 2,
+        material: material.clone(),
+        position: [0, y, d / 2],
+        userData: { part: "border" },
     });
-    bottom.position.set(0, y, size.depth / 2);
 
     const left = createRoundedMesh({
         name: "QRBorderLeft",
         width: borderThickness,
-        height: 0.014,
-        depth: size.depth,
-        radius: 0.008,
-        segments: 3,
-        material: materials.gold,
+        height: borderThickness,
+        depth: d,
+        radius: 0.006,
+        segments: 2,
+        material: material.clone(),
+        position: [-w / 2, y, 0],
+        userData: { part: "border" },
     });
-    left.position.set(-size.width / 2, y, 0);
 
     const right = createRoundedMesh({
         name: "QRBorderRight",
         width: borderThickness,
-        height: 0.014,
-        depth: size.depth,
-        radius: 0.008,
-        segments: 3,
-        material: materials.gold,
+        height: borderThickness,
+        depth: d,
+        radius: 0.006,
+        segments: 2,
+        material: material.clone(),
+        position: [w / 2, y, 0],
+        userData: { part: "border" },
     });
-    right.position.set(size.width / 2, y, 0);
 
     group.add(top, bottom, left, right);
 
     return group;
 }
 
-function createQRCardStand(config, materials) {
+function createQRCardStand(options) {
     const group = new THREE.Group();
     group.name = "QRCardStand";
+    group.visible = Boolean(options.showStand || options.orientation === QR_CARD_ORIENTATION.STANDING);
 
-    const standMaterial = materials.darkCardboard;
+    const material = createDarkMaterial(options);
 
     const backSupport = createRoundedMesh({
         name: "QRBackSupport",
-        width: 0.08,
-        height: 0.34,
+        width: 0.07,
+        height: 0.32,
         depth: 0.04,
         radius: 0.012,
         segments: 3,
-        material: standMaterial,
+        material,
+        position: [0, -0.05, -options.depth * 0.42],
+        rotation: [-0.32, 0, 0],
+        userData: {
+            part: "stand-back-support",
+        },
     });
-
-    backSupport.position.set(0, -0.04, -0.42);
-    backSupport.rotation.x = -0.28;
 
     const foot = createRoundedMesh({
         name: "QRStandFoot",
-        width: 0.66,
-        height: 0.035,
-        depth: 0.16,
+        width: options.width * 0.72,
+        height: 0.032,
+        depth: 0.15,
         radius: 0.018,
         segments: 3,
-        material: standMaterial,
+        material: material.clone(),
+        position: [0, -0.082, options.depth * 0.34],
+        userData: {
+            part: "stand-foot",
+        },
     });
 
-    foot.position.set(0, -0.07, 0.34);
-
     group.add(backSupport, foot);
-
-    group.visible = false;
 
     return group;
 }
 
-function createQRCardContactShadow(materials) {
+function createQRCardSlotBase(options) {
+    const group = new THREE.Group();
+    group.name = "QRCardSlotBase";
+    group.visible = Boolean(options.showSlotBase);
+
+    const material = createTransparentGuideMaterial(options);
+
+    const base = createRoundedMesh({
+        name: "QRSlotSoftBase",
+        width: options.width * 1.04,
+        height: 0.012,
+        depth: options.depth * 1.04,
+        radius: 0.04,
+        segments: 4,
+        material,
+        position: [0, -options.height * 0.76, 0],
+        userData: {
+            part: "slot-base",
+            role: "qr-card-placement-guide",
+        },
+    });
+
+    group.add(base);
+
+    return group;
+}
+
+function createQRCardPhysicalSeal(options) {
+    const group = new THREE.Group();
+    group.name = "QRCardPhysicalSeal";
+    group.visible = Boolean(options.showPhysicalSeal);
+
+    const y = options.height / 2 + options.surfaceLift + 0.032;
+
+    const sealMaterial = createGoldMaterial(options);
+    const innerMaterial = createDarkMaterial(options);
+
+    const seal = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.046, 0.046, 0.016, 48),
+        sealMaterial,
+    );
+    seal.name = "QRGoldSeal";
+    seal.rotation.x = Math.PI / 2;
+    seal.position.set(options.width * 0.33, y, options.depth * 0.33);
+
+    const inner = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.03, 0.03, 0.018, 48),
+        innerMaterial,
+    );
+    inner.name = "QRGoldSealInner";
+    inner.rotation.x = Math.PI / 2;
+    inner.position.copy(seal.position);
+    inner.position.y += 0.002;
+
+    group.add(seal, inner);
+    setGroupShadow(group, true, true);
+
+    return group;
+}
+
+function createScanBeam(options) {
+    const group = new THREE.Group();
+    group.name = "QRCardScanBeam";
+    group.visible = Boolean(options.showScanBeam);
+
+    const material = new THREE.MeshBasicMaterial({
+        name: "QRCardScanBeamMaterial",
+        color: options.accentColor,
+        transparent: true,
+        opacity: 0.18,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+    });
+
+    const beam = new THREE.Mesh(
+        new THREE.PlaneGeometry(options.width * 0.58, 0.018, 1, 1),
+        material,
+    );
+
+    beam.name = "QRScanBeamLine";
+    beam.rotation.x = -Math.PI / 2;
+    beam.position.y = options.height / 2 + options.surfaceLift + 0.024;
+    beam.position.z = 0;
+    beam.renderOrder = options.renderOrder + 2;
+
+    group.add(beam);
+
+    return group;
+}
+
+function createPaperLayers(options) {
+    const group = new THREE.Group();
+    group.name = "QRCardPaperLayers";
+    group.visible = Boolean(options.showPaperLayers);
+
+    const colors = [
+        options.paperBackColor,
+        "#f5e5ca",
+        options.paperColor,
+    ];
+
+    colors.forEach((color, index) => {
+        const material = createPaperMaterial(
+            `QRCardPaperLayerMaterial_${index + 1}`,
+            color,
+            {
+                ...options,
+                finish: QR_CARD_FINISHES.MATTE,
+            },
+        );
+
+        const layer = createRoundedMesh({
+            name: `QRCardPaperLayer_${index + 1}`,
+            width: options.width * (0.985 - index * 0.01),
+            height: 0.006,
+            depth: options.depth * (0.985 - index * 0.01),
+            radius: options.cornerRadius * 0.86,
+            segments: 3,
+            material,
+            position: [0, -options.height * 0.5 - index * 0.009, 0],
+            userData: {
+                part: "paper-layer",
+                layerIndex: index,
+            },
+        });
+
+        group.add(layer);
+    });
+
+    return group;
+}
+
+function createQRCardContactShadow(options) {
+    const group = new THREE.Group();
+    group.name = "QRCardSoftShadow";
+    group.visible = Boolean(options.showShadow);
+
+    const material = new THREE.MeshBasicMaterial({
+        name: "QRCardContactShadowMaterial",
+        color: "#000000",
+        transparent: true,
+        opacity: 0.13,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+    });
+
     const shadow = new THREE.Mesh(
-        new THREE.CircleGeometry(0.68, 48),
-        materials.shadowSoft,
+        new THREE.CircleGeometry(0.63, 64),
+        material,
     );
 
     shadow.name = "QRCardContactShadow";
     shadow.rotation.x = -Math.PI / 2;
-    shadow.position.y = -0.04;
-    shadow.scale.set(1.1, 0.78, 1);
+    shadow.position.y = -options.height * 0.78;
+    shadow.scale.set(1.12, 0.86, 1);
+    shadow.renderOrder = -1;
 
-    return shadow;
+    group.add(shadow);
+
+    return group;
 }
 
-export function createQRCard(config, materials, options = {}) {
-    const mergedOptions = {
-        ...DEFAULT_QR_OPTIONS,
-        ...options,
-    };
+function applyCardOrientation(group, options) {
+    if (options.orientation === QR_CARD_ORIENTATION.LEANING) {
+        group.rotation.x += -0.18;
+        group.position.y += 0.08;
+        group.position.z -= 0.02;
+    }
 
-    const group = new THREE.Group();
-    group.name = "KickOffBoxQRCard";
+    if (options.orientation === QR_CARD_ORIENTATION.STANDING) {
+        group.rotation.x += -Math.PI / 2.85;
+        group.position.y += 0.34;
+        group.position.z -= 0.1;
+    }
 
-    const shadow = createQRCardContactShadow(materials);
-    const body = createQRCardBody(config, materials);
-    const back = createQRCardBack(config, materials);
-    const surface = createQRCardSurface(config, mergedOptions);
-    const border = createQRCardBorder(config, materials);
-    const stand = createQRCardStand(config, materials);
+    if (options.orientation === QR_CARD_ORIENTATION.SLOT) {
+        group.rotation.x += -0.05;
+        group.position.y += 0.012;
+    }
+}
 
-    group.add(shadow, body, back, surface, border, stand);
-
-    const layout = config?.contentLayout?.qrCard ?? {};
+function applyConfigTransform(group, config = {}) {
+    const layout =
+        config.layout ??
+        config.transform ??
+        config.contentLayout?.qrCard ??
+        {};
 
     applyTransform(group, {
-        position: layout.position ?? [0.25, 0.62, -1.55],
+        position: layout.position ?? [0.74, 0.34, -0.36],
         rotation: layout.rotation ?? [0, 0, 0],
         scale: layout.scale ?? [1, 1, 1],
     });
+}
 
-    group.userData = {
-        type: "qr-card",
+function createMetadata(options) {
+    return {
+        objectType: "QRCard",
+        version: QR_CARD_VERSION,
+        style: options.style,
+        orientation: options.orientation,
+        finish: options.finish,
+        dimensions: {
+            width: options.width,
+            height: options.height,
+            depth: options.depth,
+        },
         editable: true,
-        visibleInPresets: ["premium"],
-        description:
-            "Tarjeta QR funcional para enlazar contenido digital del presente académico.",
-        options: mergedOptions,
+        exportable: true,
+        qrData: options.qrData,
+        scanStatus: QR_CARD_SCAN_STATUS.VISUAL_ONLY,
+        purpose: "physical-digital-access-card",
+        createdAt: new Date().toISOString(),
     };
+}
+
+export function createQRCard(config = {}, materials = {}, textureSet = {}, extraOptions = {}) {
+    const options = normalizeOptions(config, extraOptions);
+
+    const group = new THREE.Group();
+    group.name = "KickOffBoxQRCard";
+    group.userData = createMetadata(options);
+
+    const shadow = createQRCardContactShadow(options);
+    const paperLayers = createPaperLayers(options);
+    const back = createQRCardBack(options);
+    const body = createQRCardBody(options);
+    const surface = createQRCardSurface(options, textureSet);
+    const border = createQRCardBorder(options);
+    const stand = createQRCardStand(options);
+    const slotBase = createQRCardSlotBase(options);
+    const seal = createQRCardPhysicalSeal(options);
+    const scanBeam = createScanBeam(options);
+
+    group.add(
+        shadow,
+        slotBase,
+        paperLayers,
+        back,
+        body,
+        surface,
+        border,
+        stand,
+        seal,
+        scanBeam,
+    );
+
+    group.userData.parts = {
+        shadow: shadow.name,
+        slotBase: slotBase.name,
+        paperLayers: paperLayers.name,
+        back: back.name,
+        body: body.name,
+        surface: surface.name,
+        border: border.name,
+        stand: stand.name,
+        seal: seal.name,
+        scanBeam: scanBeam.name,
+    };
+
+    applyConfigTransform(group, config);
+    applyCardOrientation(group, options);
 
     setGroupShadow(group, true, true);
 
     return group;
 }
 
-export function updateQRCard(qrCardGroup, nextOptions = {}) {
-    if (!qrCardGroup) return;
+export function createQrCard(config = {}, materials = {}, textureSet = {}, extraOptions = {}) {
+    return createQRCard(config, materials, textureSet, extraOptions);
+}
+
+export function updateQRCard(qrCardGroup, nextOptions = {}, textureSet = {}) {
+    if (!qrCardGroup) return null;
 
     const surface = qrCardGroup.getObjectByName("QRCardSurface");
 
-    if (!surface?.material) return;
+    if (!surface?.material) return null;
 
-    const currentOptions = qrCardGroup.userData?.options ?? DEFAULT_QR_OPTIONS;
-    const updatedOptions = {
-        ...currentOptions,
-        ...nextOptions,
+    const currentData = qrCardGroup.userData?.qrData ?? DEFAULT_QR_DATA;
+    const currentOptions = {
+        ...qrCardGroup.userData,
+        qrData: currentData,
     };
 
-    const oldTexture = surface.material.map;
-    const { texture } = createQRCanvasTexture(updatedOptions);
+    const updatedOptions = normalizeOptions({
+        ...currentOptions,
+        ...nextOptions,
+        qr: {
+            ...currentData,
+            ...nextOptions,
+        },
+    });
 
-    surface.material.map = texture;
-    surface.material.userData.texture = texture;
-    surface.material.userData.options = updatedOptions;
-    surface.material.needsUpdate = true;
+    const previousMaterial = surface.material;
+    const nextMaterial = createSurfaceMaterial(updatedOptions, textureSet);
 
-    if (oldTexture) {
-        oldTexture.dispose();
-    }
+    surface.material = nextMaterial;
+    surface.userData.qrData = updatedOptions.qrData;
 
-    qrCardGroup.userData.options = updatedOptions;
+    disposeMaterial(previousMaterial);
+
+    qrCardGroup.userData = {
+        ...qrCardGroup.userData,
+        qrData: updatedOptions.qrData,
+        style: updatedOptions.style,
+        finish: updatedOptions.finish,
+        updatedAt: new Date().toISOString(),
+    };
+
+    return qrCardGroup;
 }
 
 export function setQRCardVisibility(qrCardGroup, visible = true) {
     if (!qrCardGroup) return;
 
     qrCardGroup.visible = Boolean(visible);
+    qrCardGroup.userData.visible = Boolean(visible);
+    qrCardGroup.userData.updatedAt = new Date().toISOString();
 }
 
 export function setQRCardStandVisibility(qrCardGroup, visible = true) {
@@ -567,6 +1414,21 @@ export function setQRCardStandVisibility(qrCardGroup, visible = true) {
     if (!stand) return;
 
     stand.visible = Boolean(visible);
+}
+
+export function setQRCardScanBeamVisibility(qrCardGroup, visible = true) {
+    const beam = qrCardGroup?.getObjectByName("QRCardScanBeam");
+
+    if (!beam) return;
+
+    beam.visible = Boolean(visible);
+}
+
+export function setQRCardOrientation(qrCardGroup, orientation = QR_CARD_ORIENTATION.FLAT) {
+    if (!qrCardGroup) return;
+
+    qrCardGroup.userData.orientation = orientation;
+    qrCardGroup.userData.updatedAt = new Date().toISOString();
 }
 
 export function setQRCardTransform(
@@ -590,6 +1452,12 @@ export function setQRCardTransform(
     if (scale) {
         qrCardGroup.scale.set(scale[0], scale[1], scale[2]);
     }
+
+    qrCardGroup.userData.updatedAt = new Date().toISOString();
+}
+
+export function getQRCardData(qrCardGroup) {
+    return qrCardGroup?.userData?.qrData ?? null;
 }
 
 export function getQRCardParts(qrCardGroup) {
@@ -598,32 +1466,103 @@ export function getQRCardParts(qrCardGroup) {
     return {
         body: qrCardGroup.getObjectByName("QRCardBody"),
         back: qrCardGroup.getObjectByName("QRCardBack"),
+        paperLayers: qrCardGroup.getObjectByName("QRCardPaperLayers"),
         surface: qrCardGroup.getObjectByName("QRCardSurface"),
         border: qrCardGroup.getObjectByName("QRCardBorder"),
         stand: qrCardGroup.getObjectByName("QRCardStand"),
-        shadow: qrCardGroup.getObjectByName("QRCardContactShadow"),
+        slotBase: qrCardGroup.getObjectByName("QRCardSlotBase"),
+        seal: qrCardGroup.getObjectByName("QRCardPhysicalSeal"),
+        scanBeam: qrCardGroup.getObjectByName("QRCardScanBeam"),
+        shadow: qrCardGroup.getObjectByName("QRCardSoftShadow"),
     };
+}
+
+export function updateQRCardAnimation(qrCardGroup, elapsedTime = 0) {
+    if (!qrCardGroup) return;
+
+    const beamLine = qrCardGroup.getObjectByName("QRScanBeamLine");
+    const seal = qrCardGroup.getObjectByName("QRCardPhysicalSeal");
+
+    if (beamLine) {
+        const amplitude = 0.24;
+        beamLine.position.z = Math.sin(elapsedTime * 1.2) * amplitude;
+
+        if (beamLine.material) {
+            beamLine.material.opacity = 0.12 + Math.sin(elapsedTime * 2.4) * 0.04;
+        }
+    }
+
+    if (seal) {
+        seal.rotation.y = Math.sin(elapsedTime * 0.28) * 0.018;
+    }
+}
+
+function disposeTexture(texture) {
+    if (texture?.dispose) {
+        texture.dispose();
+    }
+}
+
+function disposeMaterial(material) {
+    if (!material) return;
+
+    const materials = Array.isArray(material) ? material : [material];
+
+    materials.forEach((item) => {
+        if (!item) return;
+
+        disposeTexture(item.map);
+        disposeTexture(item.normalMap);
+        disposeTexture(item.roughnessMap);
+        disposeTexture(item.metalnessMap);
+        disposeTexture(item.alphaMap);
+        disposeTexture(item.emissiveMap);
+
+        if (item.userData?.texture) {
+            disposeTexture(item.userData.texture);
+        }
+
+        if (item.dispose) {
+            item.dispose();
+        }
+    });
 }
 
 export function disposeQRCard(qrCardGroup) {
     if (!qrCardGroup) return;
 
     qrCardGroup.traverse((object) => {
-        if (object.geometry) {
+        if (object.geometry?.dispose) {
             object.geometry.dispose();
         }
 
         if (object.material) {
-            const materials = Array.isArray(object.material)
-                ? object.material
-                : [object.material];
-
-            materials.forEach((material) => {
-                if (material.map) material.map.dispose();
-                material.dispose();
-            });
+            disposeMaterial(object.material);
         }
     });
 
     qrCardGroup.removeFromParent();
 }
+
+export const QRCard = Object.freeze({
+    version: QR_CARD_VERSION,
+    styles: QR_CARD_STYLES,
+    orientation: QR_CARD_ORIENTATION,
+    finishes: QR_CARD_FINISHES,
+    scanStatus: QR_CARD_SCAN_STATUS,
+
+    createQRCard,
+    createQrCard,
+    updateQRCard,
+    updateQRCardAnimation,
+
+    setQRCardVisibility,
+    setQRCardStandVisibility,
+    setQRCardScanBeamVisibility,
+    setQRCardOrientation,
+    setQRCardTransform,
+
+    getQRCardData,
+    getQRCardParts,
+    disposeQRCard,
+});
