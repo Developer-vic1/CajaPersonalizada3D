@@ -1,0 +1,966 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <!-- =========================================================
+        KICKOFFBOX MUNDIAL EDITION
+        Landing page independiente conectada al simulador 3D.
+        Archivo: landingpage.html
+        Simulador: index.html
+    ========================================================== -->
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>KickOffBox Mundial Edition | Caja personalizada Mundial 2026</title>
+
+    <meta name="description"
+        content="KickOffBox Mundial Edition: una landing premium inspirada en el Mundial 2026, con video, jugadores destacados, países anfitriones, favoritos y conexión al simulador 3D." />
+
+    <meta name="theme-color" content="#000401" />
+
+    <!-- Tipografías profesionales -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+
+    <!-- Iconos: Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        referrerpolicy="no-referrer" />
+
+    <!-- Estilos propios de la landing -->
+    <link rel="stylesheet" href="/src/landingpage.css" />
+</head>
+
+<body>
+    <!-- =========================================================
+        BACKGROUND DECORATIVO GLOBAL
+    ========================================================== -->
+    <div class="page-noise" aria-hidden="true"></div>
+    <div class="page-grid" aria-hidden="true"></div>
+    <div class="floating-light floating-light--green" aria-hidden="true"></div>
+    <div class="floating-light floating-light--gold" aria-hidden="true"></div>
+
+    <!-- =========================================================
+        NAVBAR
+    ========================================================== -->
+    <header class="site-header" data-navbar>
+        <a href="#inicio" class="brand" aria-label="Ir al inicio de KickOffBox">
+            <span class="brand__mark">
+                <i class="fa-solid fa-futbol"></i>
+            </span>
+
+            <span class="brand__text">
+                <strong>KickOffBox</strong>
+                <small>Mundial Edition</small>
+            </span>
+        </a>
+
+        <nav class="site-nav" aria-label="Navegación principal">
+            <a href="#mundial">Mundial 2026</a>
+            <a href="#trailer">Video</a>
+            <a href="#anfitriones">Anfitriones</a>
+            <a href="#estrellas">Estrellas</a>
+            <a href="#favoritos">Favoritos</a>
+            <a href="#experiencia">Experiencia</a>
+            <a href="#contacto">Contacto</a>
+        </nav>
+
+        <div class="header-actions">
+            <a href="index.html" class="header-cta">
+                <span>Simulación 3D</span>
+                <i class="fa-solid fa-cube"></i>
+            </a>
+
+            <button class="menu-toggle" type="button" aria-label="Abrir menú" data-menu-toggle>
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Menú móvil -->
+    <aside class="mobile-menu" data-mobile-menu aria-hidden="true">
+        <a href="#mundial">Mundial 2026</a>
+        <a href="#trailer">Video presentación</a>
+        <a href="#anfitriones">Países anfitriones</a>
+        <a href="#estrellas">Estrellas</a>
+        <a href="#favoritos">Favoritos</a>
+        <a href="#experiencia">KickOffBox</a>
+        <a href="#contacto">Contacto</a>
+        <a href="index.html" class="mobile-menu__cta">Entrar al simulador 3D</a>
+    </aside>
+
+    <main class="landing">
+
+        <!-- =========================================================
+            HERO PANORÁMICO
+        ========================================================== -->
+        <section id="inicio" class="hero section section--hero">
+            <div class="hero__stadium-glow" aria-hidden="true"></div>
+            <div class="hero__field-lines" aria-hidden="true"></div>
+
+            <div class="container hero__container">
+                <article class="hero__copy" data-animate="hero-copy">
+                    <span class="section-kicker">
+                        <i class="fa-solid fa-bolt"></i>
+                        Mundial 2026 Edition
+                    </span>
+
+                    <h1 class="hero__title" data-split-title>
+                        KickOffBox Mundial Edition
+                    </h1>
+
+                    <p class="hero__lead">
+                        La emoción del Mundial convertida en una caja personalizada:
+                        una experiencia visual con tonos verdes, brillo dorado, luces
+                        de estadio y espíritu de campeón.
+                    </p>
+
+                    <div class="hero__actions">
+                        <a href="index.html" class="btn btn--primary btn--magnetic">
+                            <span>Ver simulación 3D</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+
+                        <a href="#trailer" class="btn btn--secondary btn--magnetic">
+                            <span>Ver video</span>
+                            <i class="fa-solid fa-play"></i>
+                        </a>
+                    </div>
+
+                    <div class="hero__badges" aria-label="Características visuales">
+                        <span><i class="fa-solid fa-circle"></i> Verde estadio</span>
+                        <span><i class="fa-solid fa-trophy"></i> Dorado trofeo</span>
+                        <span><i class="fa-solid fa-fire"></i> Edición premium</span>
+                    </div>
+                </article>
+
+                <aside class="hero__visual" data-animate="hero-visual">
+                    <div class="premium-poster">
+                        <div class="premium-poster__top">
+                            <span>World Cup Inspired</span>
+                            <strong>2026</strong>
+                        </div>
+
+                        <div class="premium-poster__center">
+                            <div class="poster-orbit poster-orbit--one"></div>
+                            <div class="poster-orbit poster-orbit--two"></div>
+
+                            <div class="product-symbol">
+                                <i class="fa-solid fa-box-open"></i>
+                            </div>
+
+                            <h2>Una caja con espíritu de campeón</h2>
+                            <p>Diseñada para celebrar momentos especiales como una final.</p>
+                        </div>
+
+                        <div class="premium-poster__field" aria-hidden="true">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+
+                        <a href="index.html" class="premium-poster__cta">
+                            Explorar en 3D
+                            <i class="fa-solid fa-cube"></i>
+                        </a>
+                    </div>
+                </aside>
+            </div>
+
+            <div class="hero-marquee" aria-hidden="true">
+                <div>
+                    <span>Mundial 2026</span>
+                    <span>KickOffBox</span>
+                    <span>Green Edition</span>
+                    <span>World Cup Spirit</span>
+                    <span>Premium Gift Box</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+            DATOS RÁPIDOS DEL MUNDIAL
+        ========================================================== -->
+        <section class="quick-stats section section--compact" aria-label="Datos principales del Mundial 2026">
+            <div class="container">
+                <div class="stats-grid">
+                    <article class="stat-card reveal">
+                        <i class="fa-solid fa-users"></i>
+                        <strong data-count="48">0</strong>
+                        <span>selecciones</span>
+                    </article>
+
+                    <article class="stat-card reveal">
+                        <i class="fa-solid fa-calendar-days"></i>
+                        <strong data-count="104">0</strong>
+                        <span>partidos</span>
+                    </article>
+
+                    <article class="stat-card reveal">
+                        <i class="fa-solid fa-earth-americas"></i>
+                        <strong data-count="3">0</strong>
+                        <span>países anfitriones</span>
+                    </article>
+
+                    <article class="stat-card reveal">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <strong data-count="16">0</strong>
+                        <span>ciudades sede</span>
+                    </article>
+
+                    <article class="stat-card reveal">
+                        <i class="fa-solid fa-star"></i>
+                        <strong data-count="2026">0</strong>
+                        <span>edición histórica</span>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+            MUNDIAL 2026 / INFORMACIÓN CENTRAL
+        ========================================================== -->
+        <section id="mundial" class="world-section section">
+            <div class="container world-layout">
+                <article class="section-copy reveal">
+                    <span class="section-kicker">
+                        <i class="fa-solid fa-globe"></i>
+                        El torneo más grande
+                    </span>
+
+                    <h2>Mundial 2026: una celebración global</h2>
+
+                    <p>
+                        La Copa Mundial de la FIFA 2026 será una edición histórica:
+                        más selecciones, más partidos y tres países compartiendo la
+                        organización. Esa escala global inspira la identidad de
+                        KickOffBox Mundial Edition.
+                    </p>
+
+                    <p>
+                        La landing toma la energía del campeonato y la convierte en una
+                        experiencia visual: fondo oscuro, luces verdes, dorado de trofeo,
+                        detalles premium y una conexión directa al simulador 3D.
+                    </p>
+
+                    <a href="index.html" class="text-link">
+                        Ir al simulador 3D
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </a>
+                </article>
+
+                <div class="world-cards">
+                    <article class="world-card reveal">
+                        <span>01</span>
+                        <h3>Formato ampliado</h3>
+                        <p>
+                            Por primera vez, el torneo tendrá 48 selecciones, expandiendo
+                            el alcance y la diversidad de la competición.
+                        </p>
+                    </article>
+
+                    <article class="world-card reveal">
+                        <span>02</span>
+                        <h3>104 partidos</h3>
+                        <p>
+                            La experiencia mundialista será más extensa, con más encuentros,
+                            historias, cruces y emociones.
+                        </p>
+                    </article>
+
+                    <article class="world-card reveal">
+                        <span>03</span>
+                        <h3>Junio a julio</h3>
+                        <p>
+                            El torneo está previsto del 11 de junio al 19 de julio de 2026,
+                            con una narrativa deportiva de más de un mes.
+                        </p>
+                    </article>
+
+                    <article class="world-card reveal">
+                        <span>04</span>
+                        <h3>Final premium</h3>
+                        <p>
+                            La final se disputará en el área New York/New Jersey, un cierre
+                            de alto impacto para la edición 2026.
+                        </p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+            VIDEO PRINCIPAL / TRAILER
+        ========================================================== -->
+        <section id="trailer" class="trailer-section section">
+            <div class="container">
+                <div class="section-heading section-heading--center reveal">
+                    <span class="section-kicker">
+                        <i class="fa-solid fa-play"></i>
+                        Video presentación
+                    </span>
+
+                    <h2>Tráiler visual KickOffBox</h2>
+
+                    <p>
+                        Esta sección presenta el video como pieza central: tonos oscuros,
+                        energía verde, brillo dorado y una atmósfera mundialista que
+                        prepara al usuario antes de entrar al simulador 3D.
+                    </p>
+                </div>
+
+                <div class="trailer-stage reveal" data-video-stage>
+                    <div class="trailer-stage__lights" aria-hidden="true"></div>
+
+                    <div class="video-frame">
+                        <video autoplay muted loop playsinline controls preload="metadata"
+                            poster="https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=1600&q=80">
+                            <source src="/video/PRESENTACION.mp4" type="video/mp4" />
+                            Tu navegador no soporta video HTML5.
+                        </video>
+                    </div>
+
+                    <div class="trailer-caption">
+                        <span>
+                            <i class="fa-solid fa-clapperboard"></i>
+                            Presentación oficial
+                        </span>
+
+                        <a href="index.html">
+                            Abrir simulación 3D
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+            PAÍSES ANFITRIONES
+        ========================================================== -->
+        <section id="anfitriones" class="hosts-section section">
+            <div class="container">
+                <div class="section-heading reveal">
+                    <span class="section-kicker">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                        Países anfitriones
+                    </span>
+
+                    <h2>Un Mundial en Norteamérica</h2>
+
+                    <p>
+                        Canadá, México y Estados Unidos compartirán la organización del
+                        torneo. Esta triple sede se convierte en el punto de partida para
+                        una estética internacional, intensa y moderna.
+                    </p>
+                </div>
+
+                <div class="hosts-grid">
+                    <article class="host-card reveal">
+                        <img src="https://flagcdn.com/w640/ca.png" alt="Bandera de Canadá" loading="lazy" />
+
+                        <div>
+                            <span>Canadá</span>
+                            <h3>Toronto · Vancouver</h3>
+                            <p>
+                                Dos sedes que representan el norte del continente y una
+                                conexión visual limpia, moderna y global.
+                            </p>
+                        </div>
+                    </article>
+
+                    <article class="host-card host-card--featured reveal">
+                        <img src="https://flagcdn.com/w640/mx.png" alt="Bandera de México" loading="lazy" />
+
+                        <div>
+                            <span>México</span>
+                            <h3>Ciudad de México · Guadalajara · Monterrey</h3>
+                            <p>
+                                Tradición mundialista, historia futbolera y una presencia
+                                simbólica fuerte para el campeonato.
+                            </p>
+                        </div>
+                    </article>
+
+                    <article class="host-card reveal">
+                        <img src="https://flagcdn.com/w640/us.png" alt="Bandera de Estados Unidos" loading="lazy" />
+
+                        <div>
+                            <span>Estados Unidos</span>
+                            <h3>11 ciudades sede</h3>
+                            <p>
+                                La mayor cantidad de sedes, estadios de gran escala y una
+                                narrativa de espectáculo internacional.
+                            </p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+            CIUDADES SEDE
+        ========================================================== -->
+        <section class="cities-section section">
+            <div class="container">
+                <div class="section-heading section-heading--center reveal">
+                    <span class="section-kicker">
+                        <i class="fa-solid fa-city"></i>
+                        16 ciudades sede
+                    </span>
+
+                    <h2>Escenarios para una sola pasión</h2>
+
+                    <p>
+                        Las ciudades sede refuerzan el concepto de una experiencia grande,
+                        internacional y llena de energía. Cada ciudad funciona como parte
+                        del panorama mundialista de la landing.
+                    </p>
+                </div>
+
+                <div class="cities-cloud reveal">
+                    <span>Atlanta</span>
+                    <span>Boston</span>
+                    <span>Dallas</span>
+                    <span>Guadalajara</span>
+                    <span>Houston</span>
+                    <span>Kansas City</span>
+                    <span>Los Ángeles</span>
+                    <span>Ciudad de México</span>
+                    <span>Miami</span>
+                    <span>Monterrey</span>
+                    <span>New York / New Jersey</span>
+                    <span>Philadelphia</span>
+                    <span>San Francisco Bay Area</span>
+                    <span>Seattle</span>
+                    <span>Toronto</span>
+                    <span>Vancouver</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+            SELECCIONES DESTACADAS / BANDERAS
+        ========================================================== -->
+        <section class="teams-section section">
+            <div class="container">
+                <div class="section-heading reveal">
+                    <span class="section-kicker">
+                        <i class="fa-solid fa-flag"></i>
+                        Selecciones protagonistas
+                    </span>
+
+                    <h2>Países que elevan la emoción</h2>
+
+                    <p>
+                        La landing usa banderas y selecciones reconocidas para reforzar el
+                        ambiente mundialista. La intención visual es conectar la caja con
+                        la emoción del campeonato, sin depender de una sola selección.
+                    </p>
+                </div>
+
+                <div class="teams-grid">
+                    <article class="team-pill reveal">
+                        <img src="https://flagcdn.com/w160/ar.png" alt="Bandera de Argentina" loading="lazy" />
+                        <strong>Argentina</strong>
+                        <span>Campeona defensora</span>
+                    </article>
+
+                    <article class="team-pill reveal">
+                        <img src="https://flagcdn.com/w160/br.png" alt="Bandera de Brasil" loading="lazy" />
+                        <strong>Brasil</strong>
+                        <span>Historia y talento</span>
+                    </article>
+
+                    <article class="team-pill reveal">
+                        <img src="https://flagcdn.com/w160/fr.png" alt="Bandera de Francia" loading="lazy" />
+                        <strong>Francia</strong>
+                        <span>Potencia europea</span>
+                    </article>
+
+                    <article class="team-pill reveal">
+                        <img src="https://flagcdn.com/w160/es.png" alt="Bandera de España" loading="lazy" />
+                        <strong>España</strong>
+                        <span>Técnica y posesión</span>
+                    </article>
+
+                    <article class="team-pill reveal">
+                        <img src="https://flagcdn.com/w160/pt.png" alt="Bandera de Portugal" loading="lazy" />
+                        <strong>Portugal</strong>
+                        <span>Generación competitiva</span>
+                    </article>
+
+                    <article class="team-pill reveal">
+                        <img src="https://flagcdn.com/w160/gb-eng.png" alt="Bandera de Inglaterra" loading="lazy" />
+                        <strong>Inglaterra</strong>
+                        <span>Plantel de élite</span>
+                    </article>
+
+                    <article class="team-pill reveal">
+                        <img src="https://flagcdn.com/w160/de.png" alt="Bandera de Alemania" loading="lazy" />
+                        <strong>Alemania</strong>
+                        <span>Tradición mundialista</span>
+                    </article>
+
+                    <article class="team-pill reveal">
+                        <img src="https://flagcdn.com/w160/nl.png" alt="Bandera de Países Bajos" loading="lazy" />
+                        <strong>Países Bajos</strong>
+                        <span>Estilo competitivo</span>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+            ESTRELLAS DEL MUNDIAL
+            Nota: imágenes externas tipo Wikimedia Special:FilePath.
+            Si alguna no carga por cambios de nombre, reemplazar por asset local.
+        ========================================================== -->
+        <section id="estrellas" class="stars-section section">
+            <div class="container">
+                <div class="section-heading section-heading--center reveal">
+                    <span class="section-kicker">
+                        <i class="fa-solid fa-star"></i>
+                        Figuras referenciales
+                    </span>
+
+                    <h2>Estrellas que inspiran la temática</h2>
+
+                    <p>
+                        Estas tarjetas usan figuras reconocidas del fútbol mundial como
+                        inspiración visual. No representan una convocatoria definitiva;
+                        funcionan como referencias de emoción, historia, talento y espectáculo.
+                    </p>
+                </div>
+
+                <div class="players-grid">
+                    <article class="player-card reveal" data-tilt-card>
+                        <div class="player-card__image">
+                            <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Lionel%20Messi%20WC2022.jpg"
+                                alt="Lionel Messi" loading="lazy" />
+                        </div>
+
+                        <div class="player-card__content">
+                            <span>
+                                <img src="https://flagcdn.com/w40/ar.png" alt="" />
+                                Argentina
+                            </span>
+                            <h3>Lionel Messi</h3>
+                            <p>Leyenda · Campeón · Historia</p>
+                        </div>
+                    </article>
+
+                    <article class="player-card reveal" data-tilt-card>
+                        <div class="player-card__image">
+                            <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Cristiano%20Ronaldo%202018.jpg"
+                                alt="Cristiano Ronaldo" loading="lazy" />
+                        </div>
+
+                        <div class="player-card__content">
+                            <span>
+                                <img src="https://flagcdn.com/w40/pt.png" alt="" />
+                                Portugal
+                            </span>
+                            <h3>Cristiano Ronaldo</h3>
+                            <p>Ícono · Ambición · Liderazgo</p>
+                        </div>
+                    </article>
+
+                    <article class="player-card reveal" data-tilt-card>
+                        <div class="player-card__image">
+                            <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Kylian%20Mbapp%C3%A9%202019.jpg"
+                                alt="Kylian Mbappé" loading="lazy" />
+                        </div>
+
+                        <div class="player-card__content">
+                            <span>
+                                <img src="https://flagcdn.com/w40/fr.png" alt="" />
+                                Francia
+                            </span>
+                            <h3>Kylian Mbappé</h3>
+                            <p>Velocidad · Potencia · Gol</p>
+                        </div>
+                    </article>
+
+                    <article class="player-card reveal" data-tilt-card>
+                        <div class="player-card__image">
+                            <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Neymar%202018.jpg"
+                                alt="Neymar Jr." loading="lazy" />
+                        </div>
+
+                        <div class="player-card__content">
+                            <span>
+                                <img src="https://flagcdn.com/w40/br.png" alt="" />
+                                Brasil
+                            </span>
+                            <h3>Neymar Jr.</h3>
+                            <p>Magia · Técnica · Creatividad</p>
+                        </div>
+                    </article>
+
+                    <article class="player-card reveal" data-tilt-card>
+                        <div class="player-card__image">
+                            <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Vinicius%20Junior%202018.jpg"
+                                alt="Vinícius Júnior" loading="lazy" />
+                        </div>
+
+                        <div class="player-card__content">
+                            <span>
+                                <img src="https://flagcdn.com/w40/br.png" alt="" />
+                                Brasil
+                            </span>
+                            <h3>Vinícius Jr.</h3>
+                            <p>Explosión · Regate · Ritmo</p>
+                        </div>
+                    </article>
+
+                    <article class="player-card reveal" data-tilt-card>
+                        <div class="player-card__image">
+                            <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Erling%20Haaland%202023.jpg"
+                                alt="Erling Haaland" loading="lazy" />
+                        </div>
+
+                        <div class="player-card__content">
+                            <span>
+                                <img src="https://flagcdn.com/w40/no.png" alt="" />
+                                Noruega
+                            </span>
+                            <h3>Erling Haaland</h3>
+                            <p>Goleador · Fuerza · Área</p>
+                        </div>
+                    </article>
+
+                    <article class="player-card reveal" data-tilt-card>
+                        <div class="player-card__image">
+                            <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Jude%20Bellingham%202023.jpg"
+                                alt="Jude Bellingham" loading="lazy" />
+                        </div>
+
+                        <div class="player-card__content">
+                            <span>
+                                <img src="https://flagcdn.com/w40/gb-eng.png" alt="" />
+                                Inglaterra
+                            </span>
+                            <h3>Jude Bellingham</h3>
+                            <p>Liderazgo · Clase · Presencia</p>
+                        </div>
+                    </article>
+
+                    <article class="player-card reveal" data-tilt-card>
+                        <div class="player-card__image">
+                            <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Lamine%20Yamal%202023.jpg"
+                                alt="Lamine Yamal" loading="lazy" />
+                        </div>
+
+                        <div class="player-card__content">
+                            <span>
+                                <img src="https://flagcdn.com/w40/es.png" alt="" />
+                                España
+                            </span>
+                            <h3>Lamine Yamal</h3>
+                            <p>Nueva era · Talento · Futuro</p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+            FAVORITOS AL TÍTULO
+        ========================================================== -->
+        <section id="favoritos" class="favorites-section section">
+            <div class="container favorites-layout">
+                <article class="section-copy reveal">
+                    <span class="section-kicker">
+                        <i class="fa-solid fa-chart-simple"></i>
+                        Análisis referencial
+                    </span>
+
+                    <h2>Favoritos al título</h2>
+
+                    <p>
+                        Esta sección presenta un enfoque visual de selecciones candidatas
+                        según percepción competitiva previa al torneo. No representa una
+                        predicción absoluta ni un resultado garantizado.
+                    </p>
+
+                    <p>
+                        La intención es reforzar el ambiente mundialista de la landing con
+                        barras animadas, banderas y un estilo similar a un panel deportivo
+                        premium.
+                    </p>
+                </article>
+
+                <div class="favorites-panel reveal">
+                    <article class="favorite-row" data-value="92">
+                        <img src="https://flagcdn.com/w80/es.png" alt="Bandera de España" loading="lazy" />
+
+                        <div>
+                            <strong>España</strong>
+                            <span>Talento joven, posesión y equilibrio.</span>
+                        </div>
+
+                        <div class="favorite-bar">
+                            <span></span>
+                        </div>
+
+                        <em>Alta</em>
+                    </article>
+
+                    <article class="favorite-row" data-value="90">
+                        <img src="https://flagcdn.com/w80/fr.png" alt="Bandera de Francia" loading="lazy" />
+
+                        <div>
+                            <strong>Francia</strong>
+                            <span>Potencia ofensiva y experiencia internacional.</span>
+                        </div>
+
+                        <div class="favorite-bar">
+                            <span></span>
+                        </div>
+
+                        <em>Alta</em>
+                    </article>
+
+                    <article class="favorite-row" data-value="86">
+                        <img src="https://flagcdn.com/w80/gb-eng.png" alt="Bandera de Inglaterra" loading="lazy" />
+
+                        <div>
+                            <strong>Inglaterra</strong>
+                            <span>Plantel competitivo y figuras clave.</span>
+                        </div>
+
+                        <div class="favorite-bar">
+                            <span></span>
+                        </div>
+
+                        <em>Alta</em>
+                    </article>
+
+                    <article class="favorite-row" data-value="82">
+                        <img src="https://flagcdn.com/w80/ar.png" alt="Bandera de Argentina" loading="lazy" />
+
+                        <div>
+                            <strong>Argentina</strong>
+                            <span>Campeona defensora y carácter competitivo.</span>
+                        </div>
+
+                        <div class="favorite-bar">
+                            <span></span>
+                        </div>
+
+                        <em>Fuerte</em>
+                    </article>
+
+                    <article class="favorite-row" data-value="80">
+                        <img src="https://flagcdn.com/w80/br.png" alt="Bandera de Brasil" loading="lazy" />
+
+                        <div>
+                            <strong>Brasil</strong>
+                            <span>Historia, talento ofensivo y jerarquía.</span>
+                        </div>
+
+                        <div class="favorite-bar">
+                            <span></span>
+                        </div>
+
+                        <em>Fuerte</em>
+                    </article>
+
+                    <article class="favorite-row" data-value="74">
+                        <img src="https://flagcdn.com/w80/pt.png" alt="Bandera de Portugal" loading="lazy" />
+
+                        <div>
+                            <strong>Portugal</strong>
+                            <span>Generación técnica y ataque destacado.</span>
+                        </div>
+
+                        <div class="favorite-bar">
+                            <span></span>
+                        </div>
+
+                        <em>Competitiva</em>
+                    </article>
+
+                    <article class="favorite-row" data-value="68">
+                        <img src="https://flagcdn.com/w80/de.png" alt="Bandera de Alemania" loading="lazy" />
+
+                        <div>
+                            <strong>Alemania</strong>
+                            <span>Tradición mundialista y reconstrucción.</span>
+                        </div>
+
+                        <div class="favorite-bar">
+                            <span></span>
+                        </div>
+
+                        <em>Competitiva</em>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+            EXPERIENCIA KICKOFFBOX
+        ========================================================== -->
+        <section id="experiencia" class="experience-section section">
+            <div class="container">
+                <div class="section-heading section-heading--center reveal">
+                    <span class="section-kicker">
+                        <i class="fa-solid fa-box-open"></i>
+                        KickOffBox Experience
+                    </span>
+
+                    <h2>Del estadio a una caja personalizada</h2>
+
+                    <p>
+                        La landing presenta la emoción, el video y el concepto. El simulador
+                        permite visualizar la caja en 3D, explorar su contenido y probar
+                        colores antes de presentar el producto.
+                    </p>
+                </div>
+
+                <div class="experience-grid">
+                    <article class="experience-card reveal">
+                        <i class="fa-solid fa-palette"></i>
+                        <h3>Diseño visual</h3>
+                        <p>
+                            Paleta verde y dorada inspirada en estadio, trofeo y energía mundialista.
+                        </p>
+                    </article>
+
+                    <article class="experience-card reveal">
+                        <i class="fa-solid fa-cube"></i>
+                        <h3>Simulación 3D</h3>
+                        <p>
+                            Conexión directa al modelo interactivo en `index.html`.
+                        </p>
+                    </article>
+
+                    <article class="experience-card reveal">
+                        <i class="fa-solid fa-gift"></i>
+                        <h3>Producto premium</h3>
+                        <p>
+                            Caja personalizada con contenido, detalles y presentación especial.
+                        </p>
+                    </article>
+
+                    <article class="experience-card reveal">
+                        <i class="fa-solid fa-qrcode"></i>
+                        <h3>Detalle digital</h3>
+                        <p>
+                            Puede integrarse QR, mensaje personalizado y experiencia interactiva.
+                        </p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+            CTA GRANDE HACIA EL SIMULADOR
+        ========================================================== -->
+        <section class="simulator-section section">
+            <div class="container">
+                <article class="simulator-panel reveal">
+                    <div class="simulator-panel__icon">
+                        <i class="fa-solid fa-cube"></i>
+                    </div>
+
+                    <span class="section-kicker">
+                        <i class="fa-solid fa-arrow-pointer"></i>
+                        Siguiente paso
+                    </span>
+
+                    <h2>Explora la caja en formato 3D</h2>
+
+                    <p>
+                        La landing crea el impacto visual. El simulador te permite abrir la
+                        caja, modificar colores, observar el contenido y mostrar el producto
+                        de forma interactiva.
+                    </p>
+
+                    <div class="simulator-panel__actions">
+                        <a href="index.html" class="btn btn--primary btn--large btn--magnetic">
+                            <span>Entrar al simulador 3D</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+
+                        <a href="#trailer" class="btn btn--secondary btn--large btn--magnetic">
+                            <span>Volver al video</span>
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </a>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- =========================================================
+            CONTACTO
+        ========================================================== -->
+        <section id="contacto" class="contact-section section">
+            <div class="container contact-layout">
+                <article class="contact-copy reveal">
+                    <span class="section-kicker">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        Haz tu pedido
+                    </span>
+
+                    <h2>Celebra cada momento como una final</h2>
+
+                    <p>
+                        Personaliza tu KickOffBox Mundial Edition con colores, detalles
+                        y una presentación inspirada en la emoción del fútbol mundial.
+                    </p>
+                </article>
+
+                <div class="contact-cards reveal">
+                    <a href="https://wa.me/59169771661" target="_blank" rel="noopener noreferrer" class="contact-card">
+                        <i class="fa-brands fa-whatsapp"></i>
+                        <span>WhatsApp</span>
+                        <strong>69771661</strong>
+                    </a>
+
+                    <a href="https://www.instagram.com/just.for.you_c?utm_source=qr&igsh=MW54bzBueWQ4M3Blcw%3D%3D" target="_blank" rel="noopener noreferrer"
+                        class="contact-card">
+                        <i class="fa-brands fa-instagram"></i>
+                        <span>Instagram</span>
+                        <strong>@just.for.you.c</strong>
+                    </a>
+
+                    <div class="contact-card">
+                        <i class="fa-brands fa-facebook"></i>
+                        <span>Facebook</span>
+                        <strong>Just for You</strong>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+            FOOTER
+        ========================================================== -->
+        <footer class="site-footer">
+            <div class="container footer-layout">
+                <div>
+                    <strong>KickOffBox Mundial Edition</strong>
+                    <span>Una caja con espíritu de campeón.</span>
+                </div>
+
+                <a href="index.html">
+                    Simulación 3D
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+        </footer>
+    </main>
+
+    <!-- Librerías de animación.
+         Luego las usaremos en src/landingpage.js -->
+    <script type="module" src="/src/landingpage.js"></script>
+</body>
+
+</html>
